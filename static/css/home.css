@@ -349,6 +349,7 @@ html.dark .hero__video { mix-blend-mode: screen; opacity: calc(0.48 - var(--hp,0
    می‌فهمد ادامه دارد. کشیدن با ماوس، لمس، و کلید هر سه کار می‌کند. */
 
 .deck {
+  position: relative;
   padding: var(--sec-y) 0 clamp(2rem, 6vw, 3.4rem);
   background:
     radial-gradient(70% 46% at 50% 112%, rgba(30,107,87,0.14), transparent 68%),
@@ -357,7 +358,38 @@ html.dark .hero__video { mix-blend-mode: screen; opacity: calc(0.48 - var(--hp,0
   overflow: hidden;
 }
 
+/* اسم انگلیسیِ گنده‌ی پشت صحنه — همان امضای بصریِ اسلایدر کمانیِ قدیم،
+   این‌بار پشت اسلایدرِ نیم‌دار. با عوض‌شدن کارت مرکزی عوض می‌شود. */
+.deck__ghost {
+  position: absolute;
+  inset-inline: 0;
+  top: 58%;
+  z-index: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font-family: var(--font-latin);
+  font-size: clamp(3.2rem, 17vw, 10rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: rgba(20, 17, 15, 0.06);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+html.dark .deck__ghost { color: rgba(242, 240, 234, 0.07); }
+
+.deck__ghost.is-swap { animation: deck-ghost-swap 0.5s cubic-bezier(0.22,1,0.36,1); }
+
+@keyframes deck-ghost-swap {
+  0%   { opacity: 1; transform: translateY(-50%); }
+  34%  { opacity: 0; transform: translateY(calc(-50% - 0.4rem)) scale(0.985); }
+  100% { opacity: 1; transform: translateY(-50%); }
+}
+
 .deck__head {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -396,6 +428,8 @@ html.dark .hero__video { mix-blend-mode: screen; opacity: calc(0.48 - var(--hp,0
 .deck__count b { color: var(--ink); font-weight: 400; }
 
 .deck__track {
+  position: relative;
+  z-index: 1;
   display: flex;
   gap: var(--gut);
   margin-top: clamp(1.2rem, 4vw, 2rem);

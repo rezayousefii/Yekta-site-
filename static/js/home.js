@@ -326,6 +326,7 @@
     var allEl  = document.querySelector('[data-deck-all]');
     var fillEl = document.querySelector('[data-deck-fill]');
     var goBtns = document.querySelectorAll('[data-deck-go]');
+    var ghost  = document.querySelector('[data-deck-ghost]');
 
     if (allEl) allEl.textContent = pad2(slides.length);
 
@@ -358,12 +359,31 @@
       var k = nearest();
 
       if (k !== cur) {
+        var first = cur === -1;
         cur = k;
+
         if (nowEl) nowEl.textContent = pad2(k + 1);
         goBtns.forEach(function (b) {
           var dir = parseInt(b.dataset.deckGo, 10);
           b.disabled = (dir < 0 && k === 0) || (dir > 0 && k === slides.length - 1);
         });
+
+        /* اسم انگلیسیِ گنده‌ی پشت صحنه با تعویض کارت مرکزی عوض می‌شود —
+           همان امضای بصریِ اسلایدر قدیم، این‌بار روی اسلایدر نیم‌دار.
+           بار اول (بارگذاری صفحه) بی‌سروصدا می‌نشیند، بدون انیمیشن تعویض. */
+        if (ghost) {
+          var enEl = slides[k].querySelector('.slide__en');
+          var name = enEl ? enEl.textContent.trim() : '';
+
+          if (first || soft) {
+            ghost.textContent = name;
+          } else {
+            ghost.classList.remove('is-swap');
+            void ghost.offsetWidth;
+            ghost.classList.add('is-swap');
+            setTimeout(function () { ghost.textContent = name; }, 165);
+          }
+        }
       }
 
       if (fillEl) {
