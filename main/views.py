@@ -105,14 +105,32 @@ def home(request):
     minis = Showcase.objects.filter(spot="mini", is_active=True).order_by("order")[:3]
     duo = Showcase.objects.filter(spot="duo", is_active=True).order_by("order")[:2]
     plate = Showcase.objects.filter(spot="plate", is_active=True).order_by("order").first()
-    covers = Showcase.objects.filter(spot="cover", is_active=True).order_by("order")
     reel = Showcase.objects.filter(spot="reel", is_active=True).order_by("order")
 
     features = list(Showcase.objects.filter(spot="feature", is_active=True).order_by("order")[:2])
     feature_a = features[0] if features else None
     feature_b = features[1] if len(features) > 1 else None
 
-    latest = published_photos().order_by("-created", "-id")[:8]
+    latest = list(published_photos().order_by("-created", "-id")[:8])
+
+    # ===== دیوار پینترستیِ ادیتوریال («قاب برگزیده» به بعد) =====
+    # ابتدا تصویرهای دستچینِ مدیر (Showcase, spot=cover)، بعد پر می‌شود با
+    # عکس‌های واقعیِ سایت — تا این بخش هیچ‌وقت خالی و کم‌جان به نظر نرسد،
+    # و چون هر عکس ابعاد طبیعیِ خودش را نگه می‌دارد (بدون برش اجباری)،
+    # هیچ‌کدام نمی‌توانند از قابشان بیرون بزنند.
+    editorial = [
+        {"href": c.href, "src": c.image.url, "caption": c.caption, "meta": c.meta}
+        for c in Showcase.objects.filter(spot="cover", is_active=True).order_by("order")
+        if c.image
+    ]
+    used_ids = {p.pk for p in strip} | {p.pk for p in latest}
+    filler = (published_photos().exclude(pk__in=used_ids)
+              .order_by("-created", "-id")[:16])
+    editorial += [
+        {"href": reverse("photo", args=[p.pk]), "src": p.src, "caption": p.label,
+         "meta": p.field.name_fa if p.field else ""}
+        for p in filler if p.src
+    ]
 
     return render(request, "home.html", {
         "profile": profile,
@@ -122,7 +140,7 @@ def home(request):
         "strip": strip,
         "latest": latest,
         "brands": brands,
-        "minis": minis, "duo": duo, "plate": plate, "covers": covers, "reel": reel,
+        "minis": minis, "duo": duo, "plate": plate, "editorial": editorial, "reel": reel,
         "feature_a": feature_a, "feature_b": feature_b,
         "specs": profile.specs(),
         "book": book,

@@ -806,6 +806,10 @@ html.dark .slide__frame::after { color: rgba(242,240,234,0.08); }
   aspect-ratio: 3/2;
   max-height: 84vh;
   background: var(--film);
+  /* روی سافاری موبایل، overflow:hidden گاهی فرزندِ ترنسفورم‌دارِ بزرگ‌تر از
+     قاب را درست نمی‌برد؛ ترفند شناخته‌شده این است که همین قاب هم لایه‌ی
+     ترکیب خودش را بگیرد — آن‌وقت برش همیشه درست اجرا می‌شود. */
+  transform: translateZ(0);
 }
 
 .full__in img { width: 100%; height: 118%; object-fit: cover; transform: translateY(var(--py,0px)); }
@@ -1041,6 +1045,7 @@ html.dark .slide__frame::after { color: rgba(242,240,234,0.08); }
   display: block; position: relative; overflow: hidden;
   aspect-ratio: 3/4;
   background: var(--film);
+  transform: translateZ(0);
 }
 
 .duo__frame img { width: 100%; height: 114%; object-fit: cover; transform: translateY(var(--py,0px)); }
@@ -1067,6 +1072,7 @@ html.dark .slide__frame::after { color: rgba(242,240,234,0.08); }
   max-width: min(100%, 44rem);
   margin-inline: auto;
   background: var(--film);
+  transform: translateZ(0);
 }
 
 .plate__in img { width: 100%; height: 112%; object-fit: cover; transform: translateY(var(--py,0px)); }
@@ -1081,41 +1087,53 @@ html.dark .slide__frame::after { color: rgba(242,240,234,0.08); }
   color: var(--grey);
 }
 
-/* ================= ادیتوریال ================= */
+/* ================= دیوار پینترستیِ ادیتوریال ================= */
+/* column-count به هر عکس اجازه می‌دهد ارتفاع طبیعیِ خودش را داشته باشد —
+   همان شگردی که در گالری اصلی جواب داده. برخلاف شبکه‌ی نسبتِ‌ثابتِ قبلی،
+   اینجا هیچ عکسی برش نمی‌خورد و از قابش بیرون نمی‌زند. */
 
-.covers {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: clamp(1.6rem, 5vw, 2.8rem) var(--gut);
+.wall__grid {
+  column-count: 2;
+  column-gap: var(--gut);
 }
 
-@media (min-width: 900px) { .covers { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+@media (min-width: 700px)  { .wall__grid { column-count: 3; } }
+@media (min-width: 1300px) { .wall__grid { column-count: 4; } }
 
-.cover { display: block; margin: 0; min-width: 0; }
+.ed { display: block; margin: 0 0 clamp(1.6rem, 5vw, 2.8rem); break-inside: avoid; }
 
-.cover__frame {
+.ed__frame {
   display: block; overflow: hidden;
-  aspect-ratio: 3/4;
   background: var(--film);
   transition: clip-path 0.95s var(--swing), -webkit-clip-path 0.95s var(--swing);
 }
 
-.js .cover__frame { clip-path: inset(0 0 100% 0); -webkit-clip-path: inset(0 0 100% 0); }
-.js .is-in .cover__frame { clip-path: inset(0 0 0 0); -webkit-clip-path: inset(0 0 0 0); }
-.is-in .cover:nth-child(2) .cover__frame { transition-delay: 0.07s; }
-.is-in .cover:nth-child(3) .cover__frame { transition-delay: 0.14s; }
-.is-in .cover:nth-child(4) .cover__frame { transition-delay: 0.21s; }
+.js .ed__frame { clip-path: inset(0 0 100% 0); -webkit-clip-path: inset(0 0 100% 0); }
+.js .is-in .ed__frame { clip-path: inset(0 0 0 0); -webkit-clip-path: inset(0 0 0 0); }
+.is-in .ed:nth-child(2) .ed__frame { transition-delay: 0.05s; }
+.is-in .ed:nth-child(3) .ed__frame { transition-delay: 0.10s; }
+.is-in .ed:nth-child(4) .ed__frame { transition-delay: 0.15s; }
+.is-in .ed:nth-child(5) .ed__frame { transition-delay: 0.20s; }
+.is-in .ed:nth-child(6) .ed__frame { transition-delay: 0.25s; }
 
-.cover__frame img {
-  width: 100%; height: 100%; object-fit: cover;
-  transition: transform 0.9s var(--ease);
+.ed__frame img {
+  width: 100%; height: auto; display: block;
+  filter: saturate(0.94);
+  transition: transform 0.9s var(--ease), filter 0.5s;
 }
 
-.cover:hover .cover__frame img { transform: scale(1.05); }
+.ed:hover .ed__frame img { transform: scale(1.045); filter: saturate(1.05); }
 
-.cover__cap { display: block; }
-.cover__name { display: block; margin-top: 0.6rem; font-size: var(--s-0); font-weight: 600; }
-.cover__pub  { display: block; font-size: var(--s--1); color: var(--grey); }
+.ed__cap {
+  display: block; padding-top: 0.6rem;
+  transition: opacity 0.6s 0.3s, transform 0.7s 0.3s var(--ease);
+}
+
+.js .ed__cap { opacity: 0; transform: translateY(0.6rem); }
+.js .is-in .ed__cap { opacity: 1; transform: none; }
+
+.ed__name { display: block; font-size: var(--s-0); font-weight: 600; }
+.ed__pub  { display: block; font-size: var(--s--1); color: var(--grey); }
 
 .arch {
   display: flex;

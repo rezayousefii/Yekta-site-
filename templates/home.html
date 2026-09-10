@@ -308,17 +308,21 @@
   </section>
   {% endif %}
 
-  {% if covers %}
-  <section class="band band--bone covers reveal" style="padding-top:0">
-    {% for c in covers %}
-      <a class="cover" href="{{ c.href }}">
-        <span class="cover__frame"><img src="{{ c.image.url }}" alt="{{ c.caption }}" loading="lazy"></span>
-        <span class="cover__cap">
-          <span class="cover__name">{{ c.caption }}</span>
-          <span class="cover__pub">{{ c.meta }}</span>
-        </span>
-      </a>
-    {% endfor %}
+  {% if editorial %}
+  <section class="band band--bone reveal" style="padding-top:0">
+    <div class="wall__grid">
+      {% for c in editorial %}
+        <a class="ed" href="{{ c.href }}">
+          <span class="ed__frame"><img src="{{ c.src }}" alt="{{ c.caption }}" loading="lazy" decoding="async"></span>
+          {% if c.caption %}
+          <span class="ed__cap">
+            <span class="ed__name">{{ c.caption }}</span>
+            {% if c.meta %}<span class="ed__pub">{{ c.meta }}</span>{% endif %}
+          </span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
   </section>
   {% endif %}
 
