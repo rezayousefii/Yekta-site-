@@ -1,0 +1,24 @@
+{
+  "platform": "django",
+  "port": 8000,
+  "app": "yekta",
+  "django": {
+    "collectStatic": true,
+    "compileMessages": false,
+    "modifySettings": false,
+    "geospatial": false,
+    "timezone": "Asia/Tehran"
+  },
+  "disks": [
+    {
+      "name": "media",
+      "mountTo": "/usr/src/app/media"
+    }
+  ],
+  "cron": [
+    "25 20 * * * cd /usr/src/app && python manage.py nightly_report"
+  ],
+  "build": {
+    "cache": true
+  }
+}

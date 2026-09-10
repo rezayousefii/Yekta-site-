@@ -1,0 +1,126 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}{{ row.snap_company }}{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <p class="crumb">
+    <a href="{% url 'studio_requests' %}">درخواست‌ها</a><span>›</span>{{ row.snap_company }}
+  </p>
+  <h1 class="sth">{{ row.snap_company }}</h1>
+  <p class="stp">{{ day_label }} · {{ row.span }}</p>
+  <span class="tag tag--{{ row.status }}">{{ row.get_status_display }}</span>
+</section>
+
+<div class="grid2">
+
+  <!-- ═══════ جزئیات ═══════ -->
+  <section class="card">
+    <div class="card__head"><h2>جزئیات درخواست</h2></div>
+
+    <dl class="facts">
+      <div><dt>تاریخ</dt><dd>{{ day_label }}</dd></div>
+      <div><dt>ساعت</dt><dd>{{ row.span }} ({{ row.hours|fa }} ساعت)</dd></div>
+      <div><dt>نوع همکاری</dt><dd>{% if row.kind %}{{ row.kind.name }}{% else %}—{% endif %}</dd></div>
+      <div><dt>نوع مدلینگ</dt><dd>{% if row.model_type %}{{ row.model_type.name }}{% else %}—{% endif %}</dd></div>
+      <div><dt>محل</dt><dd>{% if row.place_ref %}{{ row.place_ref.name }}{% else %}—{% endif %}{% if row.place %} · {{ row.place }}{% endif %}</dd></div>
+      <div><dt>بودجه</dt><dd class="is-money">{{ row.budget_text }}</dd></div>
+      {% if row.crew %}<div><dt>تیم</dt><dd>{{ row.crew }}</dd></div>{% endif %}
+      <div><dt>ثبت شده</dt><dd>{{ row.created|jdate }} — {{ row.created|time:"H:i"|fa }}</dd></div>
+      {% if row.status == 'pending' %}
+        <div><dt>اعتبار تا</dt><dd>{{ row.expires|jdate }} — {{ row.expires|time:"H:i"|fa }}</dd></div>
+      {% endif %}
+    </dl>
+
+    {% if row.brief %}
+      <p class="brief">{{ row.brief|linebreaksbr }}</p>
+    {% endif %}
+  </section>
+
+  <!-- ═══════ کارفرما ═══════ -->
+  <section class="card">
+    <div class="card__head"><h2>کارفرما</h2></div>
+
+    <dl class="facts">
+      <div><dt>برند</dt><dd>{{ row.employer.company }}</dd></div>
+      <div><dt>رابط</dt><dd>{{ row.snap_contact }}</dd></div>
+      <div><dt>تلفن</dt><dd><a href="tel:{{ row.snap_phone }}" dir="ltr">{{ row.snap_phone }}</a></dd></div>
+      <div><dt>ایمیل</dt><dd dir="ltr">{{ row.employer.account.email }}</dd></div>
+      <div><dt>حیطه</dt><dd>{{ row.employer.get_activity_display }}</dd></div>
+      {% if row.employer.instagram %}
+        <div><dt>اینستاگرام</dt>
+          <dd><a href="https://instagram.com/{{ row.employer.instagram }}" dir="ltr"
+                 target="_blank" rel="noopener">{{ row.employer.instagram }}@</a></dd>
+        </div>
+      {% endif %}
+      {% if row.employer.city %}<div><dt>شهر</dt><dd>{{ row.employer.city }}</dd></div>{% endif %}
+      {% if row.employer.address %}<div><dt>نشانی</dt><dd>{{ row.employer.address }}</dd></div>{% endif %}
+      {% if row.employer.map_url %}
+        <div><dt>نقشه</dt>
+          <dd><a href="{{ row.employer.map_url }}" target="_blank" rel="noopener">باز کردن</a></dd>
+        </div>
+      {% endif %}
+      <div><dt>سابقه</dt><dd>{{ row.employer.requests.count|fa }} درخواست</dd></div>
+    </dl>
+  </section>
+
+</div>
+
+<!-- ═══════ تصمیم ═══════ -->
+<section class="card">
+  <div class="card__head"><h2>پاسخ تو</h2></div>
+
+  <form method="post" class="upl">
+    {% csrf_token %}
+    <input type="hidden" name="form" value="decide">
+
+    <div class="decide">
+      {% for value, label in decide.fields.status.choices %}
+        <label class="pick">
+          <input type="radio" name="status" value="{{ value }}"
+                 {% if row.status == value %}checked{% endif %}>
+          <span class="pick__box"><span class="pick__name">{{ label }}</span></span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <label class="fl">
+      <textarea name="reply" rows="3" placeholder=" ">{{ row.reply }}</textarea>
+      <span>پیام همراه پاسخ (اختیاری — برای کارفرما فرستاده می‌شود)</span>
+    </label>
+
+    <button type="submit" class="btn btn--send">ثبت پاسخ <i>&larr;</i></button>
+  </form>
+</section>
+
+<!-- ═══════ گفتگو ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>گفتگو</h2>
+    <span>{{ chat|length|fa }} پیام</span>
+  </div>
+
+  <div class="chat">
+    {% for m in chat %}
+      <div class="bub bub--{{ m.sender }}">
+        <p>{{ m.body|linebreaksbr }}</p>
+        <span>{{ m.get_sender_display }} · {{ m.created|jdate }} — {{ m.created|time:"H:i"|fa }}</span>
+      </div>
+    {% empty %}
+      <p class="card__empty">هنوز پیامی رد و بدل نشده.</p>
+    {% endfor %}
+  </div>
+
+  <form method="post" class="chat__send">
+    {% csrf_token %}
+    <input type="hidden" name="form" value="chat">
+    <label class="fl">
+      {{ chat_form.body }}<span>پیامت را بنویس</span>
+    </label>
+    <button type="submit" class="btn">فرستادن <i>&larr;</i></button>
+  </form>
+</section>
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}گزارش‌ها{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <h1 class="sth">گزارش‌ها</h1>
+  <p class="stp">
+    هر شب یک گزارش تازه ساخته می‌شود: بازدید، کلیک روی قاب‌ها، درخواست‌ها و
+    ثبت‌نام‌های همان روز.
+  </p>
+</section>
+
+<!-- ═══════ پرکلیک‌ترین‌ها از ابتدا ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>پرکلیک‌ترین قاب‌ها</h2>
+    <span>از ابتدا تا امروز</span>
+  </div>
+
+  {% if top_all %}
+    <ul class="hot">
+      {% for p in top_all %}
+        <li>
+          <a href="{% url 'photo' p.pk %}" target="_blank" rel="noopener">
+            <span class="hot__pic"><img src="{{ p.src }}" alt="" loading="lazy"></span>
+            <span class="hot__txt">
+              <b>{{ p.label }}</b>
+              <span class="hot__sub">{% if p.field %}{{ p.field.name_fa }}{% endif %}</span>
+            </span>
+            <span class="hot__n">{{ p.clicks|fa }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="card__empty">هنوز کلیکی ثبت نشده.</p>
+  {% endif %}
+</section>
+
+<!-- ═══════ گزارش‌های شبانه ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>گزارش‌های شبانه</h2>
+    <span>{{ reports|length|fa }} روز</span>
+  </div>
+
+  {% if reports %}
+    {% for r in reports %}
+      <details class="rep__day">
+        <summary>
+          <b>{{ r.day|jdate }}</b>
+          <span>{{ r.visits|fa }} بازدید · {{ r.clicks|fa }} کلیک · {{ r.requests|fa }} درخواست</span>
+        </summary>
+
+        <div class="rep">
+          <div><b>{{ r.visits|fa }}</b><span>بازدید</span></div>
+          <div><b>{{ r.guests|fa }}</b><span>بازدیدکننده</span></div>
+          <div><b>{{ r.clicks|fa }}</b><span>کلیک</span></div>
+          <div><b>{{ r.requests|fa }}</b><span>درخواست</span></div>
+          <div><b>{{ r.signups|fa }}</b><span>ثبت‌نام</span></div>
+          <div><b>{{ r.tickets|fa }}</b><span>پشتیبانی</span></div>
+        </div>
+
+        {% if r.top_rows %}
+          <ul class="rows rows--thin">
+            {% for t in r.top_rows %}
+              <li class="row">
+                <span class="row__txt">
+                  <b><a href="/photo/{{ t.pk }}/" target="_blank" rel="noopener">{{ t.title }}</a></b>
+                </span>
+                <span class="row__b">{{ t.clicks|fa }} کلیک</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </details>
+    {% endfor %}
+  {% else %}
+    <p class="card__empty">
+      هنوز گزارشی ساخته نشده. اولین گزارش امشب ساخته می‌شود — یا همین حالا
+      با دستور <code>python manage.py nightly_report</code> بسازش.
+    </p>
+  {% endif %}
+</section>
+
+{% endblock %}

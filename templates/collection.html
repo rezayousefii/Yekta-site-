@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static fa %}
+
+{% block title %}{{ field.name_fa }} — YEKTA{% endblock %}
+{% block desc %}{{ field.blurb|default:field.note|default:field.name_fa }}{% endblock %}
+{% block og_image %}{% if field.cover_url %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ field.cover_url }}">{% endif %}{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/gallery.css' %}">{% endblock %}
+{% block body_class %}has-top{% endblock %}
+
+{% block content %}
+
+<!-- سردر مجموعه: تصویرش خودکار تازه‌ترین عکسِ همین مجموعه است -->
+<header class="cset">
+  {% if field.cover_url %}
+    <span class="cset__bg" style="background-image:url('{{ field.cover_url }}')" aria-hidden="true"></span>
+  {% endif %}
+
+  <div class="cset__in">
+    <p class="crumb crumb--light">
+      <a href="{% url 'home' %}">خانه</a><span>›</span>
+      <a href="{% url 'gallery' %}">فعالیت‌ها</a><span>›</span>
+      {{ field.name_fa }}
+    </p>
+
+    <span class="cset__en">{{ field.en }}</span>
+    <h1 class="cset__title">{{ field.name_fa }}</h1>
+    {% if field.blurb or field.note %}
+      <p class="cset__note">{{ field.blurb|default:field.note }}</p>
+    {% endif %}
+
+    <p class="cset__n"><b data-count="{{ total }}">۰</b> قاب در این مجموعه</p>
+
+    <a class="cset__cta" href="{% url 'collab' %}?field={{ field.slug }}">
+      <span>درخواست همکاری در همین سبک</span><i aria-hidden="true">&larr;</i>
+    </a>
+  </div>
+</header>
+
+{% if photos %}
+  {% include "partials/masonry.html" with photos=photos %}
+
+  {% if photos.has_next %}
+    <div class="more">
+      <a class="more__btn" href="?page={{ photos.next_page_number }}">قاب‌های بیشتر</a>
+    </div>
+  {% endif %}
+{% else %}
+  <div class="void void--page">
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path class="void__seed" d="M30 52V30"/>
+      <path class="void__seed" d="M30 34c-9 0-14-6-14-13 8 0 14 5 14 13z"/>
+      <path class="void__seed" d="M30 30c9-1 14-7 13-14-8 0-13 6-13 14z"/>
+      <circle class="void__sun" cx="30" cy="14" r="5"/>
+    </svg>
+    <h3>این مجموعه هنوز خالی است</h3>
+    <p>به‌زودی قاب‌های این بخش اضافه می‌شوند.</p>
+    <a href="{% url 'gallery' %}">دیدن بقیه‌ی فعالیت‌ها</a>
+  </div>
+{% endif %}
+
+{% if others %}
+<section class="gsets">
+  <p class="lab">مجموعه‌های دیگر</p>
+  <div class="gsets__row">
+    {% for f in others %}
+      <a class="gset" href="{% url 'collection' f.slug %}">
+        <span class="gset__frame">
+          {% if f.cover_url %}<img src="{{ f.cover_url }}" alt="{{ f.name_fa }}" loading="lazy">{% endif %}
+        </span>
+        <span class="gset__name">{{ f.name_fa }}</span>
+        <span class="gset__n">{{ f.photo_count|fa }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block js %}<script src="{% static 'js/gallery.js' %}"></script>{% endblock %}

@@ -1,24 +1,39 @@
 """
-بک‌اند ورود سفارشی — همان قفل‌شدن بعد از چند تلاش ناموفق که در مدل Account
-تعریف شده بود را واقعاً اجرا می‌کند. بدون این فایل، آن فیلدها فقط تزیینی بودند.
+بک‌اند ورود سفارشی.
+
+دو کار می‌کند:
+  ۱) ورود با «جی‌میل یا شماره تلفن» — هر دو به یک حساب می‌رسند.
+  ۲) قفل‌شدن حساب بعد از چند تلاش ناموفق را واقعاً اجرا می‌کند؛ بدون این،
+     فیلدهای failed_logins/locked_until فقط تزیینی بودند.
 """
 
 from django.contrib.auth.backends import ModelBackend
 
-from .models import Account
+from .models import Account, clean_phone
 
 
 class LockoutBackend(ModelBackend):
+
+    def _find(self, raw):
+        """ورودی را — چه ایمیل باشد چه شماره — به یک حساب می‌رساند."""
+        raw = (raw or "").strip()
+        if not raw:
+            return None
+
+        phone = clean_phone(raw)
+        if phone:
+            return Account.objects.filter(phone=phone).first()
+        return Account.objects.filter(email=raw.lower()).first()
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None or password is None:
             return None
 
-        try:
-            user = Account.objects.get(email=username.strip().lower())
-        except Account.DoesNotExist:
+        user = self._find(username)
+
+        if user is None:
             # حتی وقتی کاربر پیدا نشد، یک هش بی‌مصرف چک می‌کنیم تا زمان پاسخ
-            # لو ندهد که این ایمیل اصلاً ثبت‌نام کرده یا نه (همان کاری که خود جنگو می‌کند)
+            # لو ندهد که این ایمیل/شماره اصلاً ثبت‌نام کرده یا نه
             Account().set_password(password)
             return None
 

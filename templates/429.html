@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}کمی آرام‌تر — YEKTA{% endblock %}
+{% block body_class %}has-top{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'css/gallery.css' %}">{% endblock %}
+
+{% block content %}
+<section class="oops">
+  <p class="oops__num">۴۲۹</p>
+  <h1 class="oops__title">کمی آرام‌تر</h1>
+  <p class="oops__note">
+    {{ message|default:"تعداد درخواست‌ها در مدت کوتاهی زیاد شد. چند دقیقه صبر کن و دوباره امتحان کن." }}
+  </p>
+  <div class="oops__acts">
+    <a class="oops__go" href="{% url 'home' %}">صفحه‌ی اول</a>
+    <a class="oops__alt" href="{% url 'support' %}">پشتیبانی</a>
+  </div>
+</section>
+{% endblock %}

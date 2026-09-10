@@ -420,3 +420,118 @@
   justify-self: start;
   border-bottom: 1px solid currentColor;
 }
+
+/* ── دکمه‌ی درخواست تازه، داخل سربرگ ── */
+
+.pan__new {
+  position: relative;
+  z-index: 2;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.72rem 1.6rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--jade-deep);
+  font-size: var(--s--1);
+  transition: background 0.3s, transform 0.25s cubic-bezier(0.22,1,0.36,1);
+}
+
+.pan__new:hover { background: var(--sun); transform: translateY(-2px); }
+.pan__new i { font-style: normal; transition: transform 0.35s cubic-bezier(0.22,1,0.36,1); }
+.pan__new:hover i { transform: translateX(-0.3rem); }
+
+/* ── درخواست: توضیح، گفتگو، پاسخ ── */
+
+.rq__brief {
+  font-size: var(--s--1);
+  color: var(--grey);
+  line-height: 1.9;
+  padding-inline-start: 0.8rem;
+  border-inline-start: 2px solid var(--hair);
+}
+
+.rq__chat > summary {
+  cursor: pointer;
+  font-size: var(--s--2);
+  letter-spacing: 0.08em;
+  color: var(--copper);
+  padding-block: 0.3rem;
+}
+
+.rq__chat[open] > summary { margin-block-end: 0.6rem; }
+
+.chat { display: grid; gap: 0.5rem; max-height: 22rem; overflow-y: auto; }
+
+.bub {
+  max-width: 85%;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.9rem;
+  font-size: var(--s--1);
+  line-height: 1.85;
+}
+
+.bub p { margin: 0; }
+.bub span { display: block; margin-block-start: 0.3rem; font-size: 0.62rem; opacity: 0.7; }
+
+.bub--model    { justify-self: start; background: var(--jade-deep); color: #fff; border-end-start-radius: 0.2rem; }
+.bub--employer { justify-self: end;   background: var(--bone); border-end-end-radius: 0.2rem; }
+
+.bub--system {
+  justify-self: center;
+  background: none;
+  border: 1px dashed var(--hair);
+  color: var(--grey);
+  font-size: var(--s--2);
+}
+
+.rq__reply { display: flex; gap: 0.5rem; margin-block-start: 0.3rem; }
+
+.rq__reply input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: var(--s--1);
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  transition: border-color 0.25s;
+}
+
+.rq__reply input:focus { outline: none; border-color: var(--jade); }
+
+.rq__reply button {
+  flex: none;
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  background: var(--jade-deep);
+  color: #fff;
+  font-size: var(--s--1);
+  transition: background 0.25s;
+}
+
+.rq__reply button:hover { background: var(--copper); }
+
+.rq__cancel button {
+  font-size: var(--s--2);
+  color: var(--grey);
+  border-bottom: 1px solid currentColor;
+  transition: color 0.25s;
+}
+
+.rq__cancel button:hover { color: var(--copper); }
+
+/* شبکه‌ی مویی مشترک — نسخه‌ی base.css خطوط را می‌گذارد، این‌جا فقط ستون‌ها */
+.figs.hairgrid { grid-template-columns: repeat(2, 1fr); }
+
+@media (min-width: 720px) { .figs.hairgrid { grid-template-columns: repeat(4, 1fr); } }
+
+/* «خروج» در شبکه‌ی ابزارها یک فرم است، ولی باید مثل بقیه‌ی کارت‌ها بنشیند */
+.tool button.tool__go {
+  text-align: start;
+  width: 100%;
+  justify-content: flex-start;
+}

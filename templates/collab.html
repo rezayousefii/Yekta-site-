@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+{% load static fa %}
+
+{% block title %}همکاری با یکتا{% endblock %}
+{% block desc %}نوع همکاری، محل، بودجه و تاریخ را انتخاب کن و درخواستت را بفرست.{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/collab.css' %}">{% endblock %}
+{% block body_class %}has-top co{% endblock %}
+
+{% block content %}
+
+<!-- ═══════ سردر روشن ═══════ -->
+<!-- عمداً روشن و گرم است، نه تیره: صفحه‌ای که کاربر باید در آن تصمیم
+     بگیرد و فرم پر کند نباید سنگین باشد. یشمی اینجا فقط لهجه است. -->
+<header class="cohead">
+  <div class="cohead__in">
+    <p class="crumb"><a href="{% url 'home' %}">خانه</a><span>›</span>همکاری</p>
+
+    <h1 class="cohead__title">با یکتا کار کنیم؟</h1>
+    <p class="cohead__note">
+      پنج قدم کوتاه: نوع همکاری، محل، بودجه، زمان و توضیح.
+      هر قدم را که بزنی، خلاصه‌اش کنار دستت می‌ماند.
+    </p>
+
+    <div class="cohead__chips">
+      {% if book.is_open %}
+        <span class="cochip cochip--live">پذیرش باز است</span>
+      {% else %}
+        <span class="cochip cochip--off">{{ book.closed_note|default:"پذیرش فعلاً بسته است" }}</span>
+      {% endif %}
+      {% if book.floor_price %}<span class="cochip">کف بودجه: {{ floor_fa }} تومان</span>{% endif %}
+      <span class="cochip">پاسخ تا {{ book.request_ttl|fa }} ساعت</span>
+      <span class="cochip">بیشترین مدت: {{ book.max_hours|fa }} ساعت</span>
+    </div>
+  </div>
+
+  {% if showcase %}
+    <div class="cohead__pins" aria-hidden="true">
+      {% for s in showcase %}
+        <span class="cohead__pin"><img src="{{ s.src }}" alt="" loading="lazy"></span>
+      {% endfor %}
+    </div>
+  {% endif %}
+</header>
+
+<div class="cowrap">
+
+  <!-- ═══════ ویزارد ═══════ -->
+  <form class="wz" data-wz method="post" action="{% url 'collab_submit' %}" novalidate>
+    {% csrf_token %}
+
+    <ol class="wz__steps" data-wz-steps>
+      <li class="is-on"><i>۱</i><span>همکاری</span></li>
+      <li><i>۲</i><span>محل</span></li>
+      <li><i>۳</i><span>بودجه</span></li>
+      <li><i>۴</i><span>زمان</span></li>
+      <li><i>۵</i><span>توضیح</span></li>
+    </ol>
+
+    <div class="wz__bar"><span data-wz-bar></span></div>
+
+    <!-- ── قدم ۱: نوع همکاری و نوع مدلینگ ── -->
+    <section class="wz__pane is-on" data-wz-pane>
+      <h2 class="wz__h">چه‌جور همکاری‌ای؟</h2>
+      <p class="wz__sub">اول بگو چه شکلی کار کنیم و چه مدلی می‌خواهی.</p>
+
+      <fieldset class="pickset">
+        <legend>نوع همکاری</legend>
+        <div class="picks">
+          {% for k in kinds %}
+            <label class="pick">
+              <input type="radio" name="kind" value="{{ k.pk }}" data-label="{{ k.name }}">
+              <span class="pick__box">
+                <span class="pick__name">{{ k.name }}</span>
+                {% if k.note %}<span class="pick__note">{{ k.note }}</span>{% endif %}
+              </span>
+            </label>
+          {% empty %}
+            <p class="wz__empty">هنوز نوع همکاری‌ای تعریف نشده.</p>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="pickset">
+        <legend>چه مدلی می‌خواهی؟</legend>
+        <div class="picks picks--tight">
+          {% for t in types %}
+            <label class="pick">
+              <input type="radio" name="model_type" value="{{ t.pk }}" data-label="{{ t.name }}">
+              <span class="pick__box">
+                <span class="pick__name">{{ t.name }}</span>
+                {% if t.note %}<span class="pick__note">{{ t.note }}</span>{% endif %}
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- ── قدم ۲: محل ── -->
+    <section class="wz__pane" data-wz-pane>
+      <h2 class="wz__h">کجا کار کنیم؟</h2>
+      <p class="wz__sub">محل کلی را انتخاب کن؛ اگر نشانی دقیقی داری همان‌جا بنویس.</p>
+
+      <fieldset class="pickset">
+        <legend>محل</legend>
+        <div class="picks picks--tight">
+          {% for p in places %}
+            <label class="pick">
+              <input type="radio" name="place_ref" value="{{ p.pk }}" data-label="{{ p.name }}">
+              <span class="pick__box">
+                <span class="pick__name">{{ p.name }}</span>
+                {% if p.note %}<span class="pick__note">{{ p.note }}</span>{% endif %}
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <label class="fl">
+        <input type="text" name="place" maxlength="140" placeholder=" ">
+        <span>نشانی یا نام محل (اختیاری)</span>
+      </label>
+    </section>
+
+    <!-- ── قدم ۳: بودجه ── -->
+    <section class="wz__pane" data-wz-pane>
+      <h2 class="wz__h">بودجه‌ی این پروژه</h2>
+      <p class="wz__sub">{{ book.price_note }}</p>
+
+      <div class="budget" data-budget>
+        <label class="pick pick--wide">
+          <input type="radio" name="budget_mode" value="set" checked>
+          <span class="pick__box">
+            <span class="pick__name">عدد پیشنهادی دارم</span>
+            <span class="pick__note">
+              {% if book.floor_price %}کف بودجه {{ floor_fa }} تومان است.{% else %}هر عددی که برایت منطقی است.{% endif %}
+            </span>
+          </span>
+        </label>
+
+        <div class="budget__field" data-budget-field>
+          <label class="fl fl--money">
+            <input type="text" name="budget_amount" inputmode="numeric" dir="ltr"
+                   placeholder=" " data-money
+                   {% if book.floor_price %}data-floor="{{ book.floor_price }}"{% endif %}>
+            <span>مبلغ (تومان)</span>
+          </label>
+          <p class="budget__said" data-money-say></p>
+
+          {% if book.floor_price %}
+            <div class="budget__quick">
+              <button type="button" class="qbtn" data-money-set="{{ book.floor_price }}">کف</button>
+              <button type="button" class="qbtn" data-money-add="500000">+۵۰۰ هزار</button>
+              <button type="button" class="qbtn" data-money-add="1000000">+۱ میلیون</button>
+            </div>
+          {% endif %}
+        </div>
+
+        <label class="pick pick--wide">
+          <input type="radio" name="budget_mode" value="ask">
+          <span class="pick__box">
+            <span class="pick__name">در درخواست ذکر می‌کنم</span>
+            <span class="pick__note">عددی نمی‌گذارم؛ توی گفتگو با خود یکتا به توافق می‌رسیم.</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ── قدم ۴: زمان ── -->
+    <section class="wz__pane" data-wz-pane>
+      <h2 class="wz__h">چه روزی، چه ساعتی؟</h2>
+      <p class="wz__sub">فقط روزهای نشان‌دار آزادند. ساعت‌های پر، خودکار بسته می‌شوند.</p>
+
+      <div class="cal" data-cal>
+        <div class="cal__head">
+          <button class="cal__arrow" type="button" data-go="prev" aria-label="ماه قبل">‹</button>
+          <span class="cal__month" data-cal-month></span>
+          <button class="cal__arrow" type="button" data-go="next" aria-label="ماه بعد">›</button>
+        </div>
+
+        <div class="cal__grid" data-cal-grid></div>
+
+        <p class="cal__msg" data-cal-msg></p>
+
+        <div class="cal__time" data-cal-time hidden>
+          <h3>ساعت شروع</h3>
+          <div class="slots" data-slots>
+            {% for t in times %}
+              <button type="button" class="slot" data-h="{{ t.h }}">{{ t.fa }}</button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="cal__dur" data-cal-dur hidden>
+          <h3>تا چه ساعتی</h3>
+          <div class="durs" data-durs></div>
+        </div>
+      </div>
+
+      <input type="hidden" name="date" data-f-date>
+      <input type="hidden" name="start_hour" data-f-hour>
+      <input type="hidden" name="hours" data-f-hours>
+    </section>
+
+    <!-- ── قدم ۵: توضیح ── -->
+    <section class="wz__pane" data-wz-pane>
+      <h2 class="wz__h">چیز دیگری هست که باید بدانم؟</h2>
+      <p class="wz__sub">هرچه دقیق‌تر بنویسی، پاسخ سریع‌تر و مطمئن‌تر است.</p>
+
+      <label class="fl">
+        <textarea name="brief" rows="5" placeholder=" " maxlength="2000"></textarea>
+        <span>توضیح کار</span>
+      </label>
+
+      <label class="fl">
+        <input type="text" name="crew" maxlength="140" placeholder=" ">
+        <span>تیم و همراهان (عکاس، گریمور، …)</span>
+      </label>
+
+      {% if not employer %}
+        <p class="wz__gate">
+          برای ثبت نهایی باید حساب کارفرما بسازی — همه‌ی انتخاب‌هایت محفوظ
+          می‌ماند و بعد از ثبت‌نام، درخواست خودکار کامل می‌شود.
+        </p>
+      {% endif %}
+    </section>
+
+    <!-- ── دکمه‌ها ── -->
+    <div class="wz__nav">
+      <button type="button" class="btn btn--ghost" data-wz-back hidden><i>&rarr;</i> بازگشت</button>
+      <span class="wz__spacer"></span>
+      <button type="button" class="btn" data-wz-next>ادامه <i>&larr;</i></button>
+      <button type="submit" class="btn btn--send" data-wz-send hidden>
+        {% if employer %}ثبت درخواست{% else %}ادامه و ساختن حساب{% endif %} <i>&larr;</i>
+      </button>
+    </div>
+
+    <p class="wz__alert" data-wz-alert hidden></p>
+  </form>
+
+  <!-- ═══════ خلاصه‌ی کنار دست ═══════ -->
+  <aside class="sum" data-sum>
+    <h2 class="sum__h">خلاصه‌ی درخواست</h2>
+
+    <dl class="sum__rows">
+      <div><dt>نوع همکاری</dt><dd data-sum-kind>—</dd></div>
+      <div><dt>نوع مدلینگ</dt><dd data-sum-type>—</dd></div>
+      <div><dt>محل</dt><dd data-sum-place>—</dd></div>
+      <div><dt>بودجه</dt><dd data-sum-budget>—</dd></div>
+      <div><dt>تاریخ</dt><dd data-sum-date>—</dd></div>
+      <div><dt>ساعت</dt><dd data-sum-time>—</dd></div>
+    </dl>
+
+    <div class="sum__who">
+      {% if employer %}
+        <span class="sum__badge">{{ employer.company|first }}</span>
+        <div>
+          <b>{{ employer.company }}</b>
+          <span>درخواست به نام همین برند ثبت می‌شود</span>
+        </div>
+      {% else %}
+        <span class="sum__badge sum__badge--empty">؟</span>
+        <div>
+          <b>هنوز وارد نشده‌ای</b>
+          <span>در قدم آخر حساب می‌سازی — انتخاب‌هایت گم نمی‌شود</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <p class="sum__fine">
+      هر درخواست تا {{ book.request_ttl|fa }} ساعت اعتبار دارد. تا وقتی یکتا
+      پاسخ ندهد، همان بازه برای تو نگه داشته می‌شود.
+    </p>
+  </aside>
+
+</div>
+
+{{ months|json_script:"cal-data" }}
+{{ draft|json_script:"draft-data" }}
+
+<div class="done" data-done hidden>
+  <div class="done__card">
+    <svg viewBox="0 0 80 80" aria-hidden="true">
+      <circle class="done__ring" cx="40" cy="40" r="30"/>
+      <path class="done__tick" d="M27 41l9 9 17-19"/>
+    </svg>
+    <h2>درخواستت ثبت شد</h2>
+    <p data-done-msg></p>
+    <a class="btn" href="{% url 'dashboard' %}">رفتن به پیشخوان <i>&larr;</i></a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+  <script>window.YEKTA_BOOK = {
+    dayEnd: {{ book.day_end }},
+    maxHours: {{ book.max_hours }},
+    floor: {{ book.floor_price|default:0 }},
+    signedIn: {% if employer %}true{% else %}false{% endif %}
+  };</script>
+  <script src="{% static 'js/collab.js' %}"></script>
+{% endblock %}

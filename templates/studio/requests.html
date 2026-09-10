@@ -1,0 +1,59 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}درخواست‌ها{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <h1 class="sth">درخواست‌ها</h1>
+  <p class="stp">هر درخواستی که کارفرماها فرستاده‌اند، با وضعیت و بودجه‌اش.</p>
+</section>
+
+<section class="card">
+  <div class="filt__row">
+    <a class="chipf {% if not pick %}is-on{% endif %}" href="{% url 'studio_requests' %}">
+      همه <b>{{ total|fa }}</b>
+    </a>
+    {% for s in states %}
+      <a class="chipf {% if pick == s.value %}is-on{% endif %}" href="?status={{ s.value }}">
+        {{ s.label }} <b>{{ s.n|fa }}</b>
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if rows %}
+    <ul class="rows">
+      {% for r in rows %}
+        <li class="row row--rq">
+          <a class="row__txt" href="{% url 'studio_request' r.pk %}">
+            <b>{{ r.snap_company }}</b>
+            <span>
+              {{ r.date|jdate }} · {{ r.span }}
+              {% if r.kind %} · {{ r.kind.name }}{% endif %}
+              {% if r.model_type %} · {{ r.model_type.name }}{% endif %}
+            </span>
+            <span class="row__b">{{ r.budget_text }}</span>
+          </a>
+          <span class="tag tag--{{ r.status }}">{{ r.get_status_display }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if rows.has_other_pages %}
+      <div class="pager">
+        {% if rows.has_previous %}
+          <a href="?{% if pick %}status={{ pick }}&amp;{% endif %}page={{ rows.previous_page_number }}">تازه‌تر</a>
+        {% endif %}
+        <span>صفحه {{ rows.number|fa }} از {{ rows.paginator.num_pages|fa }}</span>
+        {% if rows.has_next %}
+          <a href="?{% if pick %}status={{ pick }}&amp;{% endif %}page={{ rows.next_page_number }}">قدیمی‌تر</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p class="card__empty">با این فیلتر چیزی نیست.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

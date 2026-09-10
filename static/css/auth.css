@@ -411,3 +411,87 @@ ul.errorlist {
 
 .auth__foot { font-size: var(--s--1); color: var(--grey); }
 .auth__foot a { color: var(--jade); border-bottom: 1px solid currentColor; }
+
+/* ── ستون کناری: چرا وارد شوم؟ ── */
+
+.auth__why {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.auth__why li {
+  display: grid;
+  gap: 0.1rem;
+  padding-inline-start: 0.9rem;
+  border-inline-start: 1px solid rgba(240, 180, 41, 0.5);
+}
+
+.auth__why b { font-size: var(--s--1); font-weight: 600; }
+.auth__why span { font-size: var(--s--2); color: var(--jade-soft); line-height: 1.75; }
+
+.auth__fine {
+  position: relative;
+  z-index: 1;
+  font-size: var(--s--2);
+  color: var(--jade-soft);
+  max-width: 30ch;
+  line-height: 1.8;
+}
+
+/* ── زیر فرم ورود ── */
+
+.auth__skip {
+  font-size: var(--s--1);
+  color: var(--grey);
+  border-bottom: 1px solid transparent;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.auth__skip:hover { color: var(--jade); border-color: currentColor; }
+
+.auth__split {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: var(--s--2);
+  letter-spacing: 0.14em;
+  color: var(--grey);
+}
+
+.auth__split::before, .auth__split::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--hair);
+}
+
+/* کارت «ساختن حساب» — دومین اقدام صفحه، پس دیده می‌شود ولی رقیب دکمه‌ی ورود نیست */
+.auth__make {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.15rem 0.9rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: var(--card);
+  transition: border-color 0.25s, transform 0.25s var(--ease), background 0.25s;
+}
+
+.auth__make:hover { border-color: var(--jade); transform: translateY(-2px); background: var(--bone); }
+
+.auth__make b { font-size: var(--s-0); font-weight: 600; }
+.auth__make span { grid-column: 1; font-size: var(--s--2); color: var(--grey); line-height: 1.7; }
+
+.auth__make i {
+  grid-row: 1 / -1;
+  grid-column: 2;
+  font-style: normal;
+  color: var(--copper);
+  transition: transform 0.35s var(--ease);
+}
+
+.auth__make:hover i { transform: translateX(-0.3rem); }

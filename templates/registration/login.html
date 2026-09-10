@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block title %}ورود — YEKTA{% endblock %}
+{% block desc %}با جی‌میل یا شماره تلفن وارد شو و وضعیت درخواست‌هایت را ببین.{% endblock %}
 
 {% block css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}">{% endblock %}
 
@@ -30,16 +31,34 @@
       </span>
 
       <h2>خوش برگشتی.</h2>
-      <p>وارد شو تا وضعیت درخواست‌هایت را ببینی.</p>
+      <p>پشت این در، همان اتاق خصوصی خودت است.</p>
+
+      <!-- چرا وارد شوم؟ سه دلیل روشن، نه یک جمله‌ی تزیینی -->
+      <ul class="auth__why">
+        <li>
+          <b>درخواست‌هایت</b>
+          <span>وضعیت هرکدام — در انتظار، تایید، یا زمان جایگزین</span>
+        </li>
+        <li>
+          <b>گفتگو با یکتا</b>
+          <span>هر پیام سر جایش می‌ماند و پاک نمی‌شود</span>
+        </li>
+        <li>
+          <b>رزرو سریع‌تر</b>
+          <span>اطلاعات برندت یک‌بار ثبت شده؛ دفعه‌ی بعد فقط تاریخ را می‌زنی</span>
+        </li>
+      </ul>
     </div>
 
-    <span></span>
+    <p class="auth__fine">
+      حساب یکتا هم از همین صفحه وارد می‌شود — با جی‌میل یا شماره تلفن.
+    </p>
   </aside>
 
   <main class="auth__main">
     <div class="auth__head">
-      <h1 class="auth__title">ورود کارفرما</h1>
-      <p class="auth__sub">با ایمیل و رمزی که ثبت کرده‌ای.</p>
+      <h1 class="auth__title">ورود</h1>
+      <p class="auth__sub">با جی‌میل یا شماره تلفن و رمزی که ثبت کرده‌ای.</p>
     </div>
 
     <form method="post" novalidate>
@@ -55,17 +74,24 @@
         {% endfor %}
 
         <div class="wiz__nav">
-          <button type="submit" class="btn">ورود</button>
+          <a class="auth__skip" href="{% url 'password_reset' %}">رمزم را فراموش کرده‌ام</a>
+          <span class="spacer"></span>
+          <button type="submit" class="btn">ورود <i>&larr;</i></button>
         </div>
       </div>
     </form>
 
-    <p class="auth__foot">
-      <a href="{% url 'password_reset' %}">رمز عبور را فراموش کرده‌ای؟</a>
-    </p>
+    <div class="auth__split"><span>حساب نداری؟</span></div>
+
+    <a class="auth__make" href="{% url 'signup' %}">
+      <b>ساختن حساب کارفرما</b>
+      <span>کمتر از یک دقیقه — بعدش می‌توانی تاریخ رزرو کنی</span>
+      <i aria-hidden="true">&larr;</i>
+    </a>
 
     <p class="auth__foot">
-      حساب نداری؟ <a href="{% url 'signup' %}">ثبت‌نام کن</a>
+      فقط سوال داری و حساب نمی‌خواهی؟
+      <a href="{% url 'support' %}">از پشتیبانی بپرس</a>
     </p>
   </main>
 

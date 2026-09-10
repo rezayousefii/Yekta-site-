@@ -1,0 +1,27 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>یک چیزی خراب شد — YEKTA</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/gallery.css' %}">
+</head>
+{# ۵۰۰ عمداً از base.html ارث نمی‌برد: اگر خطا از خودِ context processor یا
+   دیتابیس باشد، قالبِ وابسته هم می‌شکند و کاربر صفحه‌ی سفید می‌بیند. #}
+<body>
+  <section class="oops">
+    <p class="oops__num">۵۰۰</p>
+    <h1 class="oops__title">یک چیزی از سمت ما خراب شد</h1>
+    <p class="oops__note">
+      تقصیر تو نیست. چند لحظه بعد دوباره امتحان کن؛ اگر باز هم همین بود،
+      از صفحه‌ی پشتیبانی خبر بده.
+    </p>
+    <div class="oops__acts">
+      <a class="oops__go" href="/">صفحه‌ی اول</a>
+      <a class="oops__alt" href="/support/">پشتیبانی</a>
+    </div>
+  </section>
+</body>
+</html>

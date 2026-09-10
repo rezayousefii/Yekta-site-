@@ -1,0 +1,566 @@
+/* ===== یکتا — فعالیت‌ها، مجموعه، تک‌قاب ===== */
+
+/* این صفحه‌ها هیرو ندارند، پس نوار بالا از همان اول تو‌پر است */
+.has-top .bar {
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 1px 0 var(--hair);
+}
+
+.crumb {
+  font-size: var(--s--2);
+  letter-spacing: 0.16em;
+  color: var(--grey);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.crumb a { border-bottom: 1px solid transparent; transition: border-color 0.25s, color 0.25s; }
+.crumb a:hover { color: var(--jade); border-color: currentColor; }
+.crumb span { opacity: 0.5; }
+.crumb--light { color: rgba(255,255,255,0.72); }
+.crumb--light a:hover { color: #fff; }
+
+.lab {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: clamp(1.2rem, 4vw, 2rem);
+  font-size: var(--s--2);
+  letter-spacing: 0.22em;
+  color: var(--grey);
+}
+
+.lab::after { content: ""; flex: 1; height: 1px; background: var(--hair); order: 1; }
+
+/* ================= سردر صفحه‌ی فعالیت‌ها ================= */
+
+.gtop {
+  padding: calc(var(--bar) + clamp(1.6rem, 6vw, 3.4rem)) var(--pad) clamp(1.4rem, 4vw, 2.2rem);
+  display: grid;
+  gap: 1rem;
+  max-width: 76rem;
+  margin-inline: auto;
+}
+
+.gtop__title {
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.gtop__note { color: var(--grey); font-size: var(--s--1); max-width: 52ch; }
+
+.gtop__count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  font-size: var(--s--1);
+  color: var(--grey);
+  padding-block-start: 0.8rem;
+  border-block-start: 1px solid var(--hair);
+}
+
+.gtop__count b {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.gtop__clear { color: var(--copper); border-bottom: 1px solid currentColor; }
+
+/* ================= فیلترها ================= */
+
+.filt { display: grid; gap: 0.9rem; }
+
+.filt__group { display: grid; gap: 0.45rem; }
+
+.filt__lab {
+  font-size: var(--s--2);
+  letter-spacing: 0.2em;
+  color: var(--grey);
+}
+
+.filt__row {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-block-end: 0.2rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filt__row::-webkit-scrollbar { display: none; }
+
+.chipf {
+  flex: none;
+  font-size: var(--s--1);
+  padding: 0.4rem 0.95rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  color: var(--grey);
+  background: var(--card);
+  white-space: nowrap;
+  transition: color 0.25s, border-color 0.25s, background 0.25s, transform 0.2s;
+}
+
+.chipf:hover { color: var(--jade); border-color: var(--jade); transform: translateY(-1px); }
+.chipf.is-on { background: var(--jade-deep); border-color: var(--jade-deep); color: #fff; }
+
+/* ================= شبکه‌ی پینترستی ================= */
+/* column-count به هر عکس اجازه می‌دهد ارتفاع طبیعی خودش را داشته باشد؛
+   با grid باید همه را به یک نسبت می‌بریدیم و حسِ پینترست از بین می‌رفت. */
+
+.pins {
+  column-count: 2;
+  column-gap: var(--gut);
+  padding-inline: var(--pad);
+  max-width: 90rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 700px)  { .pins { column-count: 3; } }
+@media (min-width: 1100px) { .pins { column-count: 4; } }
+@media (min-width: 1500px) { .pins { column-count: 5; } }
+
+.pin {
+  position: relative;
+  display: block;
+  break-inside: avoid;
+  margin-block-end: var(--gut);
+  border-radius: 0.7rem;
+  overflow: hidden;
+  background: var(--film);
+  transition: opacity 0.7s var(--ease), transform 0.8s var(--ease), box-shadow 0.4s;
+}
+
+/* حالتِ پنهان فقط وقتی معنا دارد که جاوااسکریپت هست تا دوباره نشانشان
+   بدهد؛ وگرنه کل گالری نامرئی می‌ماند. */
+.js .pin { opacity: 0; transform: translateY(1.4rem); }
+.js .pin.is-in { opacity: 1; transform: none; }
+
+.pin:hover { box-shadow: 0 16px 40px rgba(20,17,15,0.18); }
+html.dark .pin:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+
+.pin__frame { display: block; }
+
+.pin__frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: saturate(0.93);
+  transition: transform 0.8s var(--ease), filter 0.45s;
+}
+
+.pin:hover .pin__frame img { transform: scale(1.045); filter: saturate(1.05); }
+
+.pin__over {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 2.4rem 0.9rem 0.8rem;
+  display: grid;
+  gap: 0.1rem;
+  background: linear-gradient(to top, rgba(14,43,36,0.9), transparent);
+  color: #fff;
+  opacity: 0;
+  transform: translateY(0.6rem);
+  transition: opacity 0.35s, transform 0.4s var(--ease);
+}
+
+.pin:hover .pin__over, .pin:focus-visible .pin__over { opacity: 1; transform: none; }
+
+.pin__name { font-size: var(--s--1); font-weight: 600; }
+.pin__meta { font-size: var(--s--2); color: var(--jade-soft); }
+
+/* روی لمسی هاور معنا ندارد؛ عنوان همیشه دیده می‌شود ولی ملایم */
+@media (hover: none) {
+  .pin__over { opacity: 1; transform: none; padding-block-start: 3rem; }
+}
+
+/* ================= دکمه‌ی «بیشتر» ================= */
+
+.more { display: grid; justify-items: center; padding: clamp(1.6rem, 5vw, 2.6rem) var(--pad); }
+
+.more__btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 0.8rem 2.2rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: var(--s--1);
+  transition: color 0.3s, border-color 0.3s, transform 0.25s var(--ease);
+}
+
+.more__btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--jade-deep);
+  transform: translateY(101%);
+  transition: transform 0.45s var(--swing);
+}
+
+.more__btn:hover { color: #fff; border-color: var(--jade-deep); transform: translateY(-2px); }
+.more__btn:hover::before { transform: none; }
+.more__btn.is-busy { opacity: 0.5; pointer-events: none; }
+
+/* ================= سردر مجموعه ================= */
+
+.cset {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: calc(var(--bar) + clamp(2.4rem, 8vw, 5rem)) var(--pad) clamp(2rem, 7vw, 4rem);
+  background: var(--jade-deep);
+  color: #fff;
+}
+
+/* تصویر سردر، محو و تیره، پشت متن — خوانایی مقدم بر تصویر است */
+.cset__bg {
+  position: absolute;
+  inset: -6%;
+  z-index: -2;
+  background-size: cover;
+  background-position: center 28%;
+  filter: blur(3px) saturate(0.8);
+  opacity: 0.42;
+  transform: scale(1.05);
+  animation: cset-breathe 22s ease-in-out infinite;
+}
+
+@keyframes cset-breathe {
+  0%, 100% { transform: scale(1.05) translateY(0); }
+  50%      { transform: scale(1.12) translateY(-1.2%); }
+}
+
+.cset::after {
+  content: "";
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to top, var(--jade-deep) 8%, rgba(14,43,36,0.72) 60%, rgba(14,43,36,0.5) 100%);
+}
+
+.cset__in { display: grid; gap: 0.7rem; justify-items: start; max-width: 46rem; margin-inline: auto; width: 100%; }
+
+.cset__en {
+  font-family: var(--font-latin);
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  letter-spacing: 0.3em;
+  color: var(--sun);
+  padding-inline-start: 0.3em;
+}
+
+.cset__title {
+  font-size: clamp(2.1rem, 9vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.cset__note { color: rgba(255,255,255,0.78); font-size: var(--s--1); max-width: 48ch; }
+
+.cset__n { font-size: var(--s--1); color: var(--jade-soft); }
+.cset__n b { color: #fff; font-size: 1.3rem; font-weight: 400; }
+
+.cset__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding: 0.72rem 1.6rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--jade-deep);
+  font-size: var(--s--1);
+  transition: background 0.3s, transform 0.25s var(--ease);
+}
+
+.cset__cta:hover { background: var(--sun); transform: translateY(-2px); }
+.cset__cta i { font-style: normal; transition: transform 0.35s var(--ease); }
+.cset__cta:hover i { transform: translateX(-0.3rem); }
+
+/* ================= شبکه‌ی مجموعه‌ها ================= */
+
+.gsets {
+  padding: clamp(2.4rem, 8vw, 4.4rem) var(--pad);
+  max-width: 90rem;
+  margin-inline: auto;
+}
+
+.gsets__row {
+  display: flex;
+  gap: var(--gut);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block-end: 0.3rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gsets__row::-webkit-scrollbar { display: none; }
+
+.gset {
+  position: relative;
+  flex: 0 0 clamp(7rem, 26vw, 10rem);
+  display: grid;
+  gap: 0.45rem;
+}
+
+.gset__frame {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--film);
+}
+
+.gset__frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(0.55);
+  transition: transform 0.6s var(--ease), filter 0.4s;
+}
+
+.gset:hover .gset__frame img { transform: scale(1.07); filter: grayscale(0); }
+
+.gset__name { text-align: center; font-size: var(--s--1); }
+
+.gset__n {
+  position: absolute;
+  inset-block-start: 0.3rem;
+  inset-inline-end: 0.3rem;
+  min-width: 1.5rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--jade-deep);
+  color: #fff;
+  font-size: var(--s--2);
+  text-align: center;
+  line-height: 1.5rem;
+}
+
+/* ================= تک‌قاب ================= */
+
+.shotbar {
+  position: sticky;
+  inset-block-start: var(--bar);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem var(--pad);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-block-end: 1px solid var(--hair);
+  font-size: var(--s--1);
+  margin-block-start: var(--bar);
+}
+
+.shotbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink);
+  transition: gap 0.3s var(--ease);
+}
+
+.shotbar__back i { font-style: normal; color: var(--copper); }
+.shotbar__back:hover { gap: 0.85rem; }
+
+.shotbar__links { display: flex; gap: 1.1rem; color: var(--grey); }
+.shotbar__links a:hover { color: var(--jade); }
+
+.shot {
+  display: grid;
+  gap: clamp(1.4rem, 5vw, 3rem);
+  padding: clamp(1.6rem, 5vw, 3.4rem) var(--pad);
+  max-width: 82rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) {
+  .shot { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); align-items: start; }
+  .shot__side { position: sticky; inset-block-start: calc(var(--bar) * 2 + 1.4rem); }
+}
+
+.shot__figure { margin: 0; }
+
+.shot__img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.9rem;
+  background: var(--film);
+  animation: shot-in 0.9s var(--ease) both;
+}
+
+@keyframes shot-in {
+  from { opacity: 0; transform: scale(0.985) translateY(0.8rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+.shot__side { display: grid; gap: 1rem; align-content: start; justify-items: start; }
+
+.shot__tag {
+  font-size: var(--s--2);
+  letter-spacing: 0.14em;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  color: var(--jade);
+  transition: background 0.25s, color 0.25s;
+}
+
+.shot__tag:hover { background: var(--jade); color: #fff; }
+
+.shot__title {
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.shot__story { color: var(--grey); line-height: 2; max-width: 44ch; }
+.shot__story--thin { font-size: var(--s--1); opacity: 0.9; }
+
+.shot__facts {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding-block: 0.9rem;
+  border-block: 1px solid var(--hair);
+  font-size: var(--s--1);
+}
+
+.shot__facts > div { display: grid; grid-template-columns: 7rem 1fr; gap: 0.6rem; }
+.shot__facts dt { color: var(--grey); }
+.shot__facts dd { margin: 0; }
+.shot__facts dd a { color: var(--jade); border-bottom: 1px solid currentColor; }
+
+.shot__cta {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1.8rem;
+  border-radius: 999px;
+  background: var(--jade-deep);
+  color: #fff;
+  font-size: var(--s-0);
+  transition: transform 0.28s var(--ease), box-shadow 0.35s;
+}
+
+.shot__cta::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--copper);
+  transform: translateY(101%);
+  transition: transform 0.45s var(--swing);
+}
+
+.shot__cta:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(20,17,15,0.2); }
+.shot__cta:hover::before { transform: none; }
+.shot__cta i { font-style: normal; transition: transform 0.35s var(--ease); }
+.shot__cta:hover i { transform: translateX(-0.3rem); }
+
+.shot__hint { font-size: var(--s--2); color: var(--grey); }
+
+.shot__more { padding-block: clamp(1.6rem, 5vw, 3rem) 0; }
+.shot__more .lab { margin-inline: var(--pad); }
+
+/* ================= حالت خالی ================= */
+
+.void {
+  border: 1px dashed var(--hair);
+  padding: clamp(1.4rem, 5vw, 2.2rem);
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+  text-align: center;
+}
+
+.void--page { margin: clamp(1.5rem, 6vw, 3rem) var(--pad); }
+
+.void svg { width: 3.4rem; height: 3.4rem; }
+.void__seed { fill: none; stroke: var(--jade); stroke-width: 1.4; }
+.void__sun  { fill: var(--sun); opacity: 0.9; }
+
+.void h3 { font-size: var(--s-0); }
+
+.void p {
+  font-size: var(--s--1);
+  color: var(--grey);
+  max-width: 34ch;
+  line-height: 1.9;
+}
+
+.void a {
+  font-size: var(--s--1);
+  color: var(--copper);
+  border-bottom: 1px solid currentColor;
+}
+
+/* ================= صفحه‌های خطا ================= */
+
+.oops {
+  min-height: 70svh;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.7rem;
+  text-align: center;
+  padding: calc(var(--bar) + 3rem) var(--pad) 4rem;
+}
+
+.oops__flower { width: clamp(6rem, 22vw, 9rem); height: auto; }
+.oops__stem { fill: none; stroke: #2E8B72; stroke-width: 6; stroke-linecap: round; }
+.oops__leaf { fill: #2E8B72; opacity: 0.9; }
+.oops__petals ellipse { fill: var(--sun); }
+
+/* سرِ گل آرام بالا و پایین می‌رود — «افتاده» است، نه بی‌جان */
+.oops__head {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: oops-nod 5s ease-in-out infinite;
+}
+
+@keyframes oops-nod {
+  0%, 100% { transform: translate(92px, 100px) rotate(28deg); }
+  50%      { transform: translate(92px, 100px) rotate(34deg); }
+}
+
+.oops__num {
+  font-family: var(--font-fa);
+  font-size: clamp(3rem, 14vw, 6rem);
+  line-height: 1;
+  color: var(--hair);
+  letter-spacing: 0.06em;
+}
+
+.oops__title { font-size: clamp(1.4rem, 5.5vw, 2.2rem); font-weight: 700; }
+
+.oops__note { color: var(--grey); font-size: var(--s--1); max-width: 42ch; line-height: 2; }
+
+.oops__acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.oops__go, .oops__alt {
+  padding: 0.65rem 1.5rem;
+  border-radius: 999px;
+  font-size: var(--s--1);
+  transition: transform 0.25s var(--ease), background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.oops__go { background: var(--jade-deep); color: #fff; }
+.oops__go:hover { background: var(--copper); transform: translateY(-2px); }
+
+.oops__alt { border: 1px solid var(--hair); color: var(--grey); }
+.oops__alt:hover { border-color: var(--jade); color: var(--jade); transform: translateY(-2px); }
+
+@media (prefers-reduced-motion: reduce) { .oops__head { animation: none; } }

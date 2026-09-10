@@ -1,0 +1,115 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}تنظیمات{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <h1 class="sth">تنظیمات</h1>
+  <p class="stp">قواعد رزرو، کف بودجه، و اینکه چه کسی به این پنل راه دارد.</p>
+</section>
+
+<!-- ═══════ قواعد رزرو ═══════ -->
+<section class="card">
+  <div class="card__head"><h2>قواعد رزرو</h2></div>
+
+  <form method="post" class="upl">
+    {% csrf_token %}
+    <input type="hidden" name="form" value="rules">
+
+    <div class="upl__flags">
+      <label class="flag">{{ rules.is_open }}<span>پذیرش درخواست باز است</span></label>
+    </div>
+
+    <label class="fl">{{ rules.closed_note }}<span>پیامی که وقتی بسته است دیده می‌شود</span></label>
+
+    <div class="upl__grid">
+      <label class="fl">{{ rules.floor_price }}<span>کف بودجه (تومان)</span></label>
+      <label class="fl">{{ rules.day_end }}<span>دیرترین ساعت پایان کار</span></label>
+      <label class="fl">{{ rules.max_hours }}<span>بیشترین مدت هر آفیش (ساعت)</span></label>
+      <label class="fl">{{ rules.min_notice }}<span>حداقل فاصله تا امروز (روز)</span></label>
+      <label class="fl">{{ rules.horizon_days }}<span>تا چند روز جلوتر قابل رزرو</span></label>
+      <label class="fl">{{ rules.request_ttl }}<span>اعتبار هر درخواست (ساعت)</span></label>
+    </div>
+
+    <label class="fl">{{ rules.price_note }}<span>توضیحی که زیر بودجه نشان داده می‌شود</span></label>
+
+    <button type="submit" class="btn btn--send">ذخیره <i>&larr;</i></button>
+  </form>
+</section>
+
+<!-- ═══════ افزودن مدیر ═══════ -->
+{% if can_invite %}
+<section class="card">
+  <div class="card__head"><h2>افزودن مدیر</h2></div>
+  <p class="stp">
+    ایمیل و رمزی که خودت تعیین می‌کنی به او می‌دهی؛ با همان‌ها — یا با شماره
+    تلفنش — از همین صفحه‌ی ورود وارد می‌شود.
+  </p>
+
+  <form method="post" class="upl">
+    {% csrf_token %}
+    <input type="hidden" name="form" value="invite">
+
+    <div class="upl__grid">
+      <label class="fl">{{ invite.full_name }}<span>نام</span></label>
+      <label class="fl">{{ invite.email }}<span>جی‌میل</span></label>
+      <label class="fl">{{ invite.phone }}<span>شماره تلفن (اختیاری)</span></label>
+      <label class="fl">{{ invite.password }}<span>رمز عبوری که به او می‌دهی</span></label>
+      <label class="fl fl--sel">{{ invite.level }}<span>سطح دسترسی</span></label>
+    </div>
+
+    <button type="submit" class="btn btn--send">افزودن مدیر <i>&larr;</i></button>
+  </form>
+</section>
+{% endif %}
+
+<!-- ═══════ مدیران فعلی ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>کسانی که دسترسی دارند</h2>
+    <span>{{ admins|length|fa }} نفر</span>
+  </div>
+
+  <ul class="rows">
+    {% for a in admins %}
+      <li class="row {% if not a.is_active %}is-off{% endif %}">
+        <span class="row__pic row__pic--mono">{{ a.short_name|first }}</span>
+        <span class="row__txt">
+          <b>{{ a.full_name|default:a.email }}</b>
+          <span dir="ltr">{{ a.email }}{% if a.phone %} · {{ a.phone }}{% endif %}</span>
+          <span>{{ a.get_role_display }}{% if a.is_superuser %} · پنل جنگو{% endif %}</span>
+        </span>
+        {% if can_invite %}
+          <span class="row__acts">
+            <a href="/admin/main/account/{{ a.pk }}/change/" target="_blank" rel="noopener">ویرایش</a>
+          </span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<!-- ═══════ گزارش فعالیت ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>گزارش فعالیت</h2>
+    <span>هر کاری که در پنل انجام شده</span>
+  </div>
+
+  <ul class="log">
+    {% for l in log %}
+      <li>
+        <span class="log__t">{{ l.created|date:"m/d H:i"|fa }}</span>
+        <span class="log__who">{{ l.actor.short_name|default:"سیستم" }}</span>
+        <span class="log__what">{{ l.action }}</span>
+        <span class="log__on">{{ l.target }}</span>
+      </li>
+    {% empty %}
+      <li class="card__empty">هنوز چیزی ثبت نشده.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endblock %}
