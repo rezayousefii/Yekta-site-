@@ -1,0 +1,68 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}نقشه‌ی سایت{% endblock %}
+
+{% block content %}
+<div class="ysm-wrap">
+  <p class="ysm-hint">
+    روی هر بخش از تصویر بزن تا مستقیم به همان قسمت در پنل بروی.
+  </p>
+
+  <div class="ysm-frame">
+    <img src="{% static 'admin_map/site-map.jpg' %}" alt="نقشه‌ی صفحه‌ی اول یکتا">
+
+    {% for h in hotspots %}
+      <a class="ysm-spot"
+         href="{{ h.href }}"
+         style="inset-inline-start:{{ h.x }}%; top:{{ h.y }}%; width:{{ h.w }}%; height:{{ h.h }}%;">
+        <span>{{ h.label }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .ysm-wrap { max-width: 460px; margin: 0 auto; }
+  .ysm-hint { color: #666; margin: 0 0 14px; }
+
+  .ysm-frame {
+    position: relative;
+    width: 100%;
+    border: 1px solid #ddd;
+    line-height: 0;
+  }
+
+  .ysm-frame img { display: block; width: 100%; height: auto; }
+
+  .ysm-spot {
+    position: absolute;
+    display: block;
+    background: rgba(30, 107, 87, 0.10);
+    outline: 1px dashed rgba(30, 107, 87, 0.55);
+    outline-offset: -1px;
+    transition: background 0.15s;
+  }
+
+  .ysm-spot:hover { background: rgba(30, 107, 87, 0.28); }
+
+  .ysm-spot span {
+    position: absolute;
+    inset-inline-start: 0;
+    top: -1.7em;
+    background: #14110F;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 5;
+  }
+
+  .ysm-spot:hover span { opacity: 1; }
+</style>
+{% endblock %}

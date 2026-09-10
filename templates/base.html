@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F4F1E9">
+  <title>{% block title %}YEKTA{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <!-- اگر جاوااسکریپت اجرا نشود این کلاس اضافه نمی‌شود و بلوک‌های data-rise
+       به‌جای نامرئی‌ماندن، از همان اول دیده می‌شوند. -->
+  <script>document.documentElement.className += ' js';</script>
+  {% block css %}{% endblock %}
+</head>
+<body>
+
+  <div class="wave" aria-hidden="true"></div>
+
+  <header class="bar">
+    <a href="{% url 'home' %}" class="bar__mark">YEKTA</a>
+    <nav class="bar__nav">
+      <a href="{% url 'home' %}#works">کارها</a>
+      <a href="{% url 'home' %}#book">همکاری</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}">پیشخوان</a>
+      {% else %}
+        <a href="{% url 'login' %}">ورود</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if messages %}
+    <div class="msg-wrap">
+      {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- لامپ: نخ از بالای صفحه آویزان است -->
+  <button class="lamp" data-lamp aria-label="روشن و خاموش کردن چراغ">
+    <svg viewBox="0 0 40 210" aria-hidden="true">
+      <g class="lamp__rig">
+        <path class="lamp__cord" d="M20 0 V154"/>
+        <path class="lamp__socket" d="M15 155h10v6h-10z"/>
+        <circle class="lamp__glass" cx="20" cy="174" r="11"/>
+        <path class="lamp__wire" d="M16 172c2-4 6-4 8 0"/>
+        <path class="lamp__ray" d="M20 189v6"/>
+        <path class="lamp__ray" d="M8 184l-4 3"/>
+        <path class="lamp__ray" d="M32 184l4 3"/>
+      </g>
+    </svg>
+  </button>
+
+  {% block content %}{% endblock %}
+
+  <footer class="foot">
+
+    <div class="foot__row">
+      <a href="{% url 'home' %}#works">کارها</a>
+      <a href="{% url 'home' %}#book">همکاری</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}">پیشخوان</a>
+        <a href="{% url 'logout' %}">خروج</a>
+      {% else %}
+        <a href="{% url 'login' %}">ورود کارفرما</a>
+      {% endif %}
+      <a href="#">اینستاگرام</a>
+      <button class="foot__lamp" data-lamp>روشن / خاموش</button>
+    </div>
+
+  <div class="meadow" data-meadow aria-hidden="true">
+
+    <div class="meadow__sky">
+      <span class="meadow__word" data-meadow-word>YEKTA</span>
+    </div>
+
+    <!-- چمن: در عرض کشیده می‌شود تا هر پهنایی را پر کند -->
+    <svg class="meadow__grass" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <g class="mg-set mg-set--1">
+          <path class="mg" d="M-10.0 120Q-9.5 87.7 -7.4 48.1" stroke-width="5.8" opacity="0.48"/>
+          <path class="mg" d="M55.9 120Q58.4 98.4 69.6 72.0" stroke-width="5.1" opacity="0.32"/>
+          <path class="mg" d="M114.0 120Q111.9 95.5 102.6 65.4" stroke-width="3.1" opacity="0.36"/>
+          <path class="mg" d="M181.3 120Q185.3 71.5 203.1 12.2" stroke-width="5.5" opacity="0.72"/>
+          <path class="mg" d="M245.6 120Q248.4 72.6 260.9 14.8" stroke-width="3.0" opacity="0.70"/>
+          <path class="mg" d="M305.9 120Q304.6 98.5 298.5 72.2" stroke-width="5.9" opacity="0.32"/>
+          <path class="mg" d="M371.6 120Q373.5 95.4 381.8 65.4" stroke-width="3.4" opacity="0.36"/>
+          <path class="mg" d="M444.8 120Q444.0 94.8 440.1 64.1" stroke-width="5.6" opacity="0.37"/>
+          <path class="mg" d="M506.4 120Q507.1 98.4 510.1 72.1" stroke-width="3.7" opacity="0.32"/>
+          <path class="mg" d="M571.8 120Q574.3 74.1 585.8 18.0" stroke-width="3.7" opacity="0.68"/>
+          <path class="mg" d="M637.2 120Q640.9 100.0 657.5 75.4" stroke-width="3.7" opacity="0.30"/>
+          <path class="mg" d="M702.4 120Q705.1 84.5 717.9 41.1" stroke-width="4.8" opacity="0.53"/>
+          <path class="mg" d="M763.2 120Q760.3 84.1 747.0 40.2" stroke-width="4.1" opacity="0.53"/>
+          <path class="mg" d="M844.6 120Q848.3 80.3 865.0 31.7" stroke-width="3.1" opacity="0.59"/>
+          <path class="mg" d="M928.1 120Q929.7 79.2 937.1 29.4" stroke-width="5.4" opacity="0.60"/>
+          <path class="mg" d="M1009.1 120Q1008.2 82.5 1004.0 36.8" stroke-width="4.7" opacity="0.55"/>
+          <path class="mg" d="M1086.1 120Q1088.8 88.0 1101.0 48.9" stroke-width="3.3" opacity="0.47"/>
+          <path class="mg" d="M1160.7 120Q1156.9 93.5 1139.2 61.1" stroke-width="3.9" opacity="0.39"/>
+        </g>
+        <g class="mg-set mg-set--2">
+          <path class="mg" d="M12.5 120Q13.2 86.0 16.4 44.5" stroke-width="3.6" opacity="0.50"/>
+          <path class="mg" d="M72.5 120Q76.2 71.9 93.0 13.2" stroke-width="5.0" opacity="0.71"/>
+          <path class="mg" d="M136.5 120Q139.2 88.0 151.5 48.9" stroke-width="4.6" opacity="0.47"/>
+          <path class="mg" d="M207.2 120Q205.1 91.7 195.3 57.2" stroke-width="3.9" opacity="0.42"/>
+          <path class="mg" d="M264.6 120Q264.3 74.1 263.2 17.9" stroke-width="5.9" opacity="0.68"/>
+          <path class="mg" d="M332.5 120Q330.5 97.6 321.4 70.2" stroke-width="3.3" opacity="0.33"/>
+          <path class="mg" d="M396.6 120Q396.0 97.6 393.1 70.3" stroke-width="3.6" opacity="0.33"/>
+          <path class="mg" d="M469.8 120Q473.7 98.1 491.3 71.4" stroke-width="3.6" opacity="0.32"/>
+          <path class="mg" d="M530.8 120Q530.5 90.1 528.8 53.5" stroke-width="5.9" opacity="0.44"/>
+          <path class="mg" d="M590.4 120Q593.9 79.1 609.8 29.2" stroke-width="3.6" opacity="0.61"/>
+          <path class="mg" d="M663.1 120Q665.6 93.5 677.3 61.0" stroke-width="4.8" opacity="0.39"/>
+          <path class="mg" d="M722.3 120Q719.9 73.9 709.3 17.5" stroke-width="3.0" opacity="0.68"/>
+          <path class="mg" d="M791.7 120Q792.9 72.0 798.6 13.3" stroke-width="5.1" opacity="0.71"/>
+          <path class="mg" d="M869.5 120Q871.3 86.8 879.7 46.2" stroke-width="4.0" opacity="0.49"/>
+          <path class="mg" d="M956.9 120Q958.4 90.7 965.1 54.8" stroke-width="5.7" opacity="0.43"/>
+          <path class="mg" d="M1033.7 120Q1034.8 98.7 1039.8 72.7" stroke-width="6.0" opacity="0.32"/>
+          <path class="mg" d="M1112.6 120Q1113.4 100.2 1117.1 76.0" stroke-width="4.4" opacity="0.29"/>
+          <path class="mg" d="M1186.2 120Q1183.6 95.1 1171.7 64.6" stroke-width="5.7" opacity="0.37"/>
+        </g>
+        <g class="mg-set mg-set--3">
+          <path class="mg" d="M35.7 120Q38.0 82.4 48.6 36.4" stroke-width="3.3" opacity="0.56"/>
+          <path class="mg" d="M97.1 120Q93.3 96.4 75.8 67.6" stroke-width="4.6" opacity="0.35"/>
+          <path class="mg" d="M161.4 120Q162.7 86.3 168.6 45.0" stroke-width="4.4" opacity="0.50"/>
+          <path class="mg" d="M224.2 120Q223.4 78.3 219.8 27.4" stroke-width="5.5" opacity="0.62"/>
+          <path class="mg" d="M286.1 120Q287.2 98.9 291.8 73.2" stroke-width="5.3" opacity="0.31"/>
+          <path class="mg" d="M349.4 120Q346.8 77.4 335.2 25.4" stroke-width="4.7" opacity="0.63"/>
+          <path class="mg" d="M416.4 120Q418.8 72.3 429.8 13.9" stroke-width="3.9" opacity="0.71"/>
+          <path class="mg" d="M489.4 120Q488.0 78.2 481.9 27.0" stroke-width="3.9" opacity="0.62"/>
+          <path class="mg" d="M553.6 120Q556.5 84.0 569.7 40.1" stroke-width="3.5" opacity="0.53"/>
+          <path class="mg" d="M619.7 120Q620.6 74.9 624.3 19.8" stroke-width="4.3" opacity="0.67"/>
+          <path class="mg" d="M683.2 120Q684.9 95.9 692.9 66.4" stroke-width="3.2" opacity="0.36"/>
+          <path class="mg" d="M742.0 120Q738.6 87.9 722.7 48.6" stroke-width="3.5" opacity="0.48"/>
+          <path class="mg" d="M815.9 120Q812.2 96.9 795.4 68.7" stroke-width="3.1" opacity="0.34"/>
+          <path class="mg" d="M899.5 120Q899.9 98.9 901.5 73.0" stroke-width="5.2" opacity="0.31"/>
+          <path class="mg" d="M985.1 120Q987.4 88.7 997.9 50.5" stroke-width="5.6" opacity="0.46"/>
+          <path class="mg" d="M1062.0 120Q1061.1 79.5 1057.1 29.9" stroke-width="5.2" opacity="0.60"/>
+          <path class="mg" d="M1131.8 120Q1131.8 80.4 1131.7 31.9" stroke-width="4.8" opacity="0.59"/>
+          <path class="mg" d="M1211.5 120Q1214.6 88.0 1228.7 48.8" stroke-width="4.0" opacity="0.47"/>
+        </g>
+    </svg>
+
+    <!-- گل: اندازه‌اش ثابت می‌ماند و همیشه وسط می‌ایستد -->
+    <svg class="meadow__plant" viewBox="0 0 300 420" preserveAspectRatio="xMidYMax meet">
+      <path class="meadow__stem" d="M150 420C150 356 143 268 148 156"/>
+      <path class="meadow__leaf" d="M148 268c-30-17-58-11-74 9 26 15 54 13 74-9z"/>
+      <path class="meadow__leaf" d="M150 214c28-19 56-15 74 3-24 17-52 17-74-3z"/>
+
+      <!-- گردن: از نوک ساقه می‌چرخد، پس سر واقعاً روی ساقه خم می‌شود -->
+      <g class="meadow__neck" data-meadow-neck transform="translate(148 156)">
+        <g transform="translate(2 -46)">
+          <!-- صورت گل: JS آن را در سه بعد می‌چرخاند تا رو به «YEKTA» بماند -->
+          <g class="meadow__face" data-meadow-head>
+          <g class="meadow__bloom">
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(0.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(22.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(45.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(67.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(90.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(112.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(135.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(157.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(180.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(202.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(225.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(247.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(270.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(292.5)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(315.0)"/>
+            <ellipse class="mp" cx="0" cy="-54" rx="12.5" ry="33" transform="rotate(337.5)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(11.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(33.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(56.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(78.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(101.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(123.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(146.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(168.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(191.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(213.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(236.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(258.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(281.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(303.75)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(326.25)"/>
+            <ellipse class="mp mp--in" cx="0" cy="-42" rx="10" ry="25" transform="rotate(348.75)"/>
+          </g>
+          <!-- قرص وسط کمی جلوتر از گلبرگ‌هاست؛ همین عمق واقعی را می‌سازد -->
+          <g class="meadow__disc">
+            <circle class="meadow__core" cx="0" cy="0" r="25"/>
+            <circle class="meadow__core meadow__core--in" cx="0" cy="0" r="17"/>
+            <circle class="ms" cx="9.0" cy="0.0" r="1.9"/>
+            <circle class="ms" cx="6.4" cy="6.4" r="1.9"/>
+            <circle class="ms" cx="0.0" cy="9.0" r="1.9"/>
+            <circle class="ms" cx="-6.4" cy="6.4" r="1.9"/>
+            <circle class="ms" cx="-9.0" cy="0.0" r="1.9"/>
+            <circle class="ms" cx="-6.4" cy="-6.4" r="1.9"/>
+            <circle class="ms" cx="-0.0" cy="-9.0" r="1.9"/>
+            <circle class="ms" cx="6.4" cy="-6.4" r="1.9"/>
+            <circle class="ms" cx="15.5" cy="3.8" r="1.9"/>
+            <circle class="ms" cx="12.0" cy="10.6" r="1.9"/>
+            <circle class="ms" cx="5.7" cy="15.0" r="1.9"/>
+            <circle class="ms" cx="-1.9" cy="15.9" r="1.9"/>
+            <circle class="ms" cx="-9.1" cy="13.2" r="1.9"/>
+            <circle class="ms" cx="-14.2" cy="7.5" r="1.9"/>
+            <circle class="ms" cx="-16.0" cy="0.0" r="1.9"/>
+            <circle class="ms" cx="-14.2" cy="-7.4" r="1.9"/>
+            <circle class="ms" cx="-9.1" cy="-13.2" r="1.9"/>
+            <circle class="ms" cx="-2.0" cy="-15.9" r="1.9"/>
+            <circle class="ms" cx="5.6" cy="-15.0" r="1.9"/>
+            <circle class="ms" cx="12.0" cy="-10.6" r="1.9"/>
+            <circle class="ms" cx="15.5" cy="-3.9" r="1.9"/>
+          </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </div>
+  </footer>
+
+  {% block js %}{% endblock %}
+
+  <!-- base.js عمداً آخرین اسکریپت است: باید بداند home.js روی این صفحه هست یا نه
+       تا منطق لامپ دوبار وصل نشود. -->
+  <script src="{% static 'js/base.js' %}"></script>
+</body>
+</html>

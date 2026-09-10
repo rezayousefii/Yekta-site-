@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}پیشخوان — YEKTA{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/panel.css' %}">{% endblock %}
+
+{% block content %}
+<div class="pan">
+
+  <!-- ═══════ سربرگ ═══════ -->
+  <header class="pan__top" data-rise>
+
+    <svg class="pan__sun" viewBox="0 0 120 120" aria-hidden="true">
+      <ellipse cx="60" cy="26" rx="9" ry="26"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(30 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(60 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(90 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(120 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(150 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(180 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(210 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(240 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(270 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(300 60 60)"/>
+      <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(330 60 60)"/>
+      <circle cx="60" cy="60" r="21"/>
+    </svg>
+
+    <p class="crumb">
+      <a href="{% url 'home' %}">خانه</a>
+      <span>›</span>
+      پیشخوان
+    </p>
+
+    <div class="pan__id">
+      <span class="pan__mono">{% if employer %}{{ employer.company|first }}{% else %}؟{% endif %}</span>
+      <div>
+        <h1 class="pan__title">پیشخوان</h1>
+        <p class="pan__who">
+          {% if employer %}
+            {{ employer.company }} — {{ employer.get_activity_display }}
+          {% else %}
+            حساب بدون برند
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <p class="pan__where">
+      اینجا اتاق خصوصی توست: هر درخواست همکاری که برای یکتا می‌فرستی و هر پاسخی
+      که می‌گیری، همین‌جا می‌ماند. تقویم و نمونه‌کارها در صفحه‌ی اصلی هستند —
+      از «ابزارها» پایین‌تر یک‌کلیک می‌روی.
+    </p>
+
+    <div class="chips">
+      {% if user.email_verified %}
+        <span class="chip-s chip-s--ok">ایمیل تایید شده</span>
+      {% else %}
+        <span class="chip-s chip-s--warn">ایمیل هنوز تایید نشده</span>
+      {% endif %}
+
+      {% if employer.is_trusted %}
+        <span class="chip-s chip-s--ok">کارفرمای مورد اعتماد</span>
+      {% endif %}
+
+      {% if upcoming %}
+        <span class="chip-s">نزدیک‌ترین آفیش: {{ upcoming.date }} — {{ upcoming.span }}</span>
+      {% endif %}
+    </div>
+
+  </header>
+
+  <!-- ═══════ شمارنده‌ها ═══════ -->
+  <section class="figs" data-rise aria-label="یک نگاه کلی">
+    <div class="fig">
+      <b data-count="{{ counts.all }}">۰</b>
+      <span>کل درخواست‌ها</span>
+    </div>
+    <div class="fig fig--live">
+      <b data-count="{{ counts.pending }}">۰</b>
+      <span>در انتظار پاسخ</span>
+    </div>
+    <div class="fig fig--ok">
+      <b data-count="{{ counts.approved }}">۰</b>
+      <span>تایید شده</span>
+    </div>
+    <div class="fig">
+      <b data-count="{{ unread }}">۰</b>
+      <span>پیام نخوانده</span>
+    </div>
+  </section>
+
+  <!-- ═══════ ابزارها ═══════ -->
+  <section data-rise>
+    <p class="crumb" style="margin-bottom:0.9rem;">ابزارها</p>
+
+    <div class="tools">
+
+      <a class="tool" href="{% url 'home' %}#book">
+        <span class="tool__go">درخواست همکاری تازه <i>&larr;</i></span>
+        <span class="tool__hint">صفحه‌ی اصلی › بخش «همکاری» — روز و ساعت را از تقویم بردار</span>
+      </a>
+
+      <a class="tool" href="{% url 'home' %}#book">
+        <span class="tool__go">تقویم آفیش یکتا <i>&larr;</i></span>
+        <span class="tool__hint">ببین کدام روزها آزاد است، پیش از آنکه وقت بگیری</span>
+      </a>
+
+      <a class="tool" href="{% url 'home' %}#works">
+        <span class="tool__go">نمونه‌کارها <i>&larr;</i></span>
+        <span class="tool__hint">صفحه‌ی اصلی › بخش «کارها» — قاب‌به‌قاب</span>
+      </a>
+
+      <a class="tool" href="{% url 'home' %}#fields">
+        <span class="tool__go">حوزه‌های کاری <i>&larr;</i></span>
+        <span class="tool__hint">ببین یکتا در چه سبک‌هایی کار می‌کند</span>
+      </a>
+
+      <span class="tool tool--off">
+        <span class="tool__go">ویرایش اطلاعات برند <i>&larr;</i></span>
+        <span class="tool__hint">به‌زودی — فعلاً برای تغییر، از همین صفحه به یکتا پیام بده</span>
+      </span>
+
+      <a class="tool" href="{% url 'logout' %}">
+        <span class="tool__go">خروج از حساب <i>&larr;</i></span>
+        <span class="tool__hint">دفعه‌ی بعد با همان ایمیل و رمز برمی‌گردی</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ═══════ درخواست‌ها و گفتگو ═══════ -->
+  <div class="pans">
+
+    <section class="pane" data-rise>
+      <div class="pane__head">
+        <h2 class="pane__title">درخواست‌های من</h2>
+        <span class="pane__n">{{ counts.all }} مورد</span>
+      </div>
+
+      {% if requests %}
+        <div>
+          {% for r in requests %}
+            <article class="rq">
+              <div class="rq__top">
+                <span class="rq__when"><b>{{ r.date }}</b> — {{ r.span }}</span>
+                <span class="tag tag--{{ r.status }}">{{ r.get_status_display }}</span>
+              </div>
+              <p class="rq__meta">
+                {% if r.field %}{{ r.field.name_fa }}{% else %}بدون حوزه‌ی مشخص{% endif %}
+                {% if r.place %} · {{ r.place }}{% endif %}
+                {% if r.budget %} · {{ r.budget }}{% endif %}
+              </p>
+              {% if r.reply %}<p class="rq__meta">پاسخ یکتا: {{ r.reply }}</p>{% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="void">
+          <svg viewBox="0 0 60 60" aria-hidden="true">
+            <path class="void__seed" d="M30 52V30"/>
+            <path class="void__seed" d="M30 34c-9 0-14-6-14-13 8 0 14 5 14 13z"/>
+            <path class="void__seed" d="M30 30c9-1 14-7 13-14-8 0-13 6-13 14z"/>
+            <circle class="void__sun" cx="30" cy="14" r="5"/>
+          </svg>
+          <h3>هنوز هیچ درخواستی نداری</h3>
+          <p>
+            وقتی روز و ساعتی را از تقویم انتخاب کنی و بفرستی، همان لحظه اینجا
+            یک ردیف ساخته می‌شود و وضعیتش را زنده دنبال می‌کنی.
+          </p>
+          <a href="{% url 'home' %}#book">اولین درخواست را بفرست</a>
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="pane" data-rise>
+      <div class="pane__head">
+        <h2 class="pane__title">گفتگو با یکتا</h2>
+        <span class="pane__n">{% if unread %}{{ unread }} نخوانده{% else %}به‌روز{% endif %}</span>
+      </div>
+
+      {% if msgs %}
+        <div>
+          {% for m in msgs %}
+            <article class="ms-row {% if m.sender == 'model' and not m.read_at %}ms-row--new{% endif %}">
+              <p class="ms-row__who">{{ m.get_sender_display }} · {{ m.created|date:"Y/m/d" }}</p>
+              <p class="ms-row__body">{{ m.body }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="void">
+          <svg viewBox="0 0 60 60" aria-hidden="true">
+            <path class="void__seed" d="M12 18h36v22H30l-10 8v-8h-8z"/>
+            <circle class="void__sun" cx="24" cy="29" r="2.6"/>
+            <circle class="void__sun" cx="32" cy="29" r="2.6"/>
+            <circle class="void__sun" cx="40" cy="29" r="2.6"/>
+          </svg>
+          <h3>صندوق پیام خالی است</h3>
+          <p>
+            گفتگو با ثبت اولین درخواست باز می‌شود. پاسخ یکتا — تایید، رد، یا
+            پیشنهاد زمان جایگزین — همین‌جا می‌نشیند و پاک هم نمی‌شود.
+          </p>
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+
+  <!-- ═══════ کارت برند ═══════ -->
+  {% if employer %}
+    <section class="idc" data-rise>
+      <div class="idc__head">
+        <h2 class="pane__title">کارت برند</h2>
+        <span class="pane__n">آنچه یکتا از تو می‌بیند</span>
+      </div>
+
+      <dl class="idc__rows">
+        <div class="idc__row"><dt>برند</dt><dd>{{ employer.company }}</dd></div>
+        <div class="idc__row"><dt>حیطه</dt><dd>{{ employer.get_activity_display }}</dd></div>
+        <div class="idc__row"><dt>رابط پروژه</dt><dd>{{ employer.contact_name }}</dd></div>
+        <div class="idc__row"><dt>شماره تماس</dt><dd dir="ltr">{{ employer.phone }}</dd></div>
+        {% if employer.instagram %}
+          <div class="idc__row">
+            <dt>اینستاگرام</dt>
+            <dd><a href="https://instagram.com/{{ employer.instagram }}" dir="ltr" rel="noopener" target="_blank">{{ employer.instagram }}@</a></dd>
+          </div>
+        {% endif %}
+        {% if employer.city %}
+          <div class="idc__row"><dt>شهر</dt><dd>{{ employer.city }}</dd></div>
+        {% endif %}
+        {% if employer.address %}
+          <div class="idc__row"><dt>نشانی</dt><dd>{{ employer.address }}</dd></div>
+        {% endif %}
+        {% if employer.map_url %}
+          <div class="idc__row">
+            <dt>روی نقشه</dt>
+            <dd><a href="{{ employer.map_url }}" rel="noopener" target="_blank">باز کردن موقعیت</a></dd>
+          </div>
+        {% endif %}
+        {% if employer.link_list %}
+          <div class="idc__row">
+            <dt>لینک‌ها</dt>
+            <dd>
+              {% for ln in employer.link_list %}
+                <a href="{{ ln }}" dir="ltr" rel="noopener" target="_blank">{{ ln }}</a><br>
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+      </dl>
+
+      <p class="idc__note">
+        این همان اطلاعاتی است که هنگام ثبت‌نام دادی و یکتا موقع بررسی درخواست
+        می‌بیند. برای اصلاحش فعلاً کافی است در گفتگو بنویسی.
+      </p>
+    </section>
+  {% endif %}
+
+  <a class="pan__out" href="{% url 'logout' %}">خروج از حساب</a>
+
+</div>
+{% endblock %}

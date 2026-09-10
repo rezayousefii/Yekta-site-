@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ثبت‌نام کارفرما — YEKTA{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth">
+
+  <aside class="auth__side">
+    <span class="auth__mark">YEKTA</span>
+
+    <div class="auth__pitch">
+      <span class="auth__bloom" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <g class="spin">
+            <ellipse cx="60" cy="30" rx="8" ry="24"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(45 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(90 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(135 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(180 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(225 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(270 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(315 60 60)"/>
+          </g>
+          <circle class="sun-core" cx="60" cy="60" r="19"/>
+          <circle class="sun-seed" cx="60" cy="60" r="10"/>
+        </svg>
+      </span>
+
+      <h2>تاریخ آزاد را بردارید.</h2>
+      <p>
+        حساب کارفرما بسازید تا بتوانید روز و ساعت آزاد را رزرو کنید و
+        وضعیت درخواست‌هایتان را دنبال کنید.
+      </p>
+    </div>
+
+    <span></span>
+  </aside>
+
+  <main class="auth__main">
+    <div class="auth__head">
+      <h1 class="auth__title">ثبت‌نام کارفرما</h1>
+      <p class="auth__sub">سه گام کوتاه، کمتر از یک دقیقه.</p>
+    </div>
+
+    <div class="wiz__rail">
+      <div class="wiz__bar" style="--prog:33"></div>
+      <ol class="wiz__steps">
+        <li class="is-on"><i>01</i> حساب</li>
+        <li><i>02</i> کسب‌وکار</li>
+        <li><i>03</i> موقعیت</li>
+      </ol>
+    </div>
+
+    <form method="post" novalidate data-wiz>
+      {% csrf_token %}
+
+      <div class="auth__errors">{{ form.non_field_errors }}</div>
+
+      <!-- گام ۱ -->
+      <fieldset class="wiz__pane is-on">
+        {% for f in form %}{% if f.name == 'full_name' or f.name == 'email' or f.name == 'password' or f.name == 'password2' %}
+          <label class="fl {% if f.errors %}has-error{% endif %}">
+            {{ f }}<span>{{ f.label }}</span>
+            {{ f.errors }}
+            {% if f.name == 'password' %}
+              <div class="meter" data-level="0" aria-hidden="true"><i></i><i></i><i></i></div>
+            {% endif %}
+          </label>
+        {% endif %}{% endfor %}
+      </fieldset>
+
+      <!-- گام ۲ -->
+      <fieldset class="wiz__pane">
+        {% for f in form %}{% if f.name == 'company' or f.name == 'activity' or f.name == 'contact_name' or f.name == 'phone' or f.name == 'instagram' %}
+          <label class="fl {% if f.errors %}has-error{% endif %}">
+            {{ f }}<span>{{ f.label }}</span>
+            {{ f.errors }}
+          </label>
+        {% endif %}{% endfor %}
+
+        <div class="links" data-links>
+          <div class="links__head">
+            <span>لینک‌های دیگر</span>
+            <span>اختیاری</span>
+          </div>
+
+          <ul class="links__list"></ul>
+
+          <div class="links__row">
+            <label class="fl" style="flex:1">
+              <input type="text" class="links__in" placeholder=" " dir="ltr"
+                     data-hint="سایت، کاتالوگ، یا هر لینکی که کمک می‌کند">
+              <span>افزودن لینک</span>
+            </label>
+            <button type="button" class="chip" data-link-add>افزودن</button>
+          </div>
+
+          {{ form.links }}
+        </div>
+      </fieldset>
+
+      <!-- گام ۳ -->
+      <fieldset class="wiz__pane">
+        {% for f in form %}{% if f.name == 'city' or f.name == 'address' %}
+          <label class="fl {% if f.errors %}has-error{% endif %}">
+            {{ f }}<span>{{ f.label }}</span>
+            {{ f.errors }}
+          </label>
+        {% endif %}{% endfor %}
+
+        <div class="mapbox">
+          <div class="mapbox__frame"><div id="map"></div></div>
+
+          <div class="mapbox__tools">
+            <button type="button" class="chip" data-here>موقعیت فعلی من</button>
+            <button type="button" class="chip chip--go" data-pick>همین‌جاست</button>
+          </div>
+
+          <span class="mapbox__said"></span>
+          <small class="fl__hint">
+            نشانگر را بکشید یا روی نقشه بزنید، بعد «همین‌جاست» را بزنید. اختیاری است.
+          </small>
+        </div>
+
+        {{ form.lat }}
+        {{ form.lng }}
+      </fieldset>
+
+      <div class="wiz__nav">
+        <button type="button" class="btn btn--ghost" data-back hidden><i>&rarr;</i> بازگشت</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-next>ادامه <i>&larr;</i></button>
+        <button type="submit" class="btn" data-send hidden>ساختن حساب <i>&larr;</i></button>
+      </div>
+    </form>
+
+    <p class="auth__foot">
+      حساب داری؟ <a href="{% url 'login' %}">وارد شو</a>
+    </p>
+  </main>
+
+</div>
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+  <script src="{% static 'js/signup.js' %}"></script>
+{% endblock %}

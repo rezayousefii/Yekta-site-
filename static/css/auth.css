@@ -1,0 +1,413 @@
+/* ===== صفحه‌های حساب: ثبت‌نام و ورود ===== */
+
+/* این صفحه‌ها هیرو ندارند، پس نوار بالا باید از همان اول تو‌پر باشد
+   وگرنه محتوا موقع اسکرول از پشتش رد می‌شود. */
+.bar {
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 1px 0 var(--hair);
+}
+
+.auth {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--paper);
+}
+
+@media (min-width: 940px) {
+  .auth { grid-template-columns: 0.85fr 1.15fr; }
+}
+
+/* ── ستون یشمی (فقط دسکتاپ) ── */
+
+.auth__side {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  padding: var(--pad);
+  align-content: space-between;
+  background:
+    radial-gradient(90% 60% at 20% 0%, rgba(30,107,87,0.55), transparent 62%),
+    var(--jade-deep);
+  color: #fff;
+}
+
+@media (min-width: 940px) { .auth__side { display: grid; } }
+
+.auth__side::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -18%;
+  bottom: -22%;
+  width: 34rem; height: 34rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,180,41,0.16), transparent 68%);
+  animation: auth-orb 19s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes auth-orb {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50%      { transform: translate(-6%, -5%) scale(1.12); }
+}
+
+.auth__mark {
+  position: relative; z-index: 1;
+  font-family: var(--font-latin);
+  font-size: 2rem; letter-spacing: 0.34em;
+  padding-inline-start: 0.34em;
+}
+
+.auth__pitch { position: relative; z-index: 1; display: grid; gap: 1rem; max-width: 22ch; }
+
+.auth__pitch h2 {
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+  font-weight: 700; line-height: 1.3;
+}
+
+.auth__pitch p { color: var(--jade-soft); font-size: var(--s--1); max-width: 30ch; }
+
+.auth__bloom { width: 5rem; height: 5rem; }
+.auth__bloom svg { width: 100%; height: 100%; }
+.auth__bloom ellipse { fill: var(--sun); }
+
+.auth__bloom .spin {
+  transform-box: view-box; transform-origin: 60px 60px;
+  transition: transform 0.9s cubic-bezier(0.22,1,0.36,1);
+  transform: rotate(calc(var(--turn, 0) * 40deg));
+}
+
+/* ── ستون فرم ── */
+
+.auth__main {
+  display: grid;
+  align-content: start;
+  gap: 1.5rem;
+  padding: calc(var(--bar) + 2.2rem) var(--pad) 3rem;
+  max-width: 34rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.auth__head { display: grid; gap: 0.4rem; }
+
+.auth__title { font-size: clamp(1.5rem, 5.4vw, 2.1rem); font-weight: 700; }
+.auth__sub { color: var(--grey); font-size: var(--s--1); }
+
+/* ── گام‌ها: شماره‌های ادیتوریال روی یک خط ── */
+
+.wiz__rail { display: grid; gap: 0.9rem; }
+
+.wiz__bar {
+  height: 1px;
+  background: var(--hair);
+  position: relative;
+}
+
+.wiz__bar::after {
+  content: "";
+  position: absolute;
+  inset-block: -1px;
+  inset-inline-start: 0;
+  height: 3px;
+  width: calc(var(--prog, 33) * 1%);
+  background: var(--copper);
+  transition: width 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+
+.wiz__steps {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; justify-content: space-between; gap: 0.5rem;
+}
+
+.wiz__steps li {
+  display: flex; align-items: baseline; gap: 0.4rem;
+  font-size: var(--s--2);
+  color: var(--grey);
+  opacity: 0.55;
+  transition: opacity 0.4s, color 0.4s;
+}
+
+.wiz__steps li i {
+  font-style: normal;
+  font-family: var(--font-latin);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+}
+
+.wiz__steps li.is-on { opacity: 1; color: var(--ink); }
+.wiz__steps li.is-on i { color: var(--copper); }
+.wiz__steps li.is-done { opacity: 1; color: var(--jade); }
+
+/* ── پنجره‌های گام ── */
+
+.wiz__pane { display: none; border: 0; padding: 0; margin: 0; }
+
+.wiz__pane.is-on {
+  display: grid; gap: 1.15rem;
+  animation: pane-in 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+
+@keyframes pane-in {
+  from { opacity: 0; transform: translateY(1.2rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── فیلد با برچسب شناور ── */
+
+.fl { position: relative; display: block; }
+
+.fl input, .fl textarea, .fl select {
+  font: inherit;
+  width: 100%;
+  padding: 1.35rem 1.1rem 0.55rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--ink);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.fl textarea { resize: vertical; min-height: 5.5rem; }
+.fl select { padding-top: 1.35rem; appearance: none; -webkit-appearance: none; }
+
+.fl input:focus, .fl textarea:focus, .fl select:focus {
+  outline: none;
+  border-color: var(--jade);
+  box-shadow: 0 0 0 3px rgba(30,107,87,0.1);
+}
+
+.fl > span {
+  position: absolute;
+  inset-inline-start: 1.15rem;
+  top: 1rem;
+  font-size: var(--s-0);
+  color: var(--grey);
+  pointer-events: none;
+  transform-origin: 100% 0;
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), color 0.22s;
+}
+
+.fl input:focus + span,
+.fl input:not(:placeholder-shown) + span,
+.fl textarea:focus + span,
+.fl textarea:not(:placeholder-shown) + span,
+.fl select + span {
+  transform: translateY(-0.72rem) scale(0.76);
+  color: var(--jade);
+}
+
+/* نمونه‌ی سبز — موقع کلیک روی فیلد باز می‌شود */
+.fl__eg {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  color: var(--jade);
+  font-size: var(--s--2);
+  padding-inline-start: 1.15rem;
+  transition: grid-template-rows 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s;
+}
+
+.fl__eg > span { overflow: hidden; }
+.fl.is-focus .fl__eg { grid-template-rows: 1fr; opacity: 1; margin-top: 0.35rem; }
+
+/* خطای همان لحظه */
+.fl__bad {
+  display: block;
+  margin-top: 0.35rem;
+  padding-inline-start: 1.15rem;
+  font-size: var(--s--2);
+  color: var(--copper);
+}
+
+.fl.has-error input, .fl.has-error textarea, .fl.has-error select {
+  border-color: var(--copper);
+}
+
+.fl.is-good input, .fl.is-good textarea, .fl.is-good select {
+  border-color: rgba(30,107,87,0.45);
+}
+
+ul.errorlist {
+  list-style: none; margin: 0.35rem 0 0; padding-inline-start: 1.15rem;
+  color: var(--copper); font-size: var(--s--2);
+}
+
+/* ── سنجه‌ی قدرت رمز ── */
+
+.meter { display: flex; gap: 0.3rem; margin-top: 0.5rem; padding-inline-start: 1.15rem; }
+
+.meter i {
+  height: 3px; flex: 1;
+  border-radius: 999px;
+  background: var(--hair);
+  transition: background 0.35s;
+}
+
+.meter[data-level="1"] i:nth-child(1) { background: var(--copper); }
+.meter[data-level="2"] i:nth-child(-n+2) { background: var(--sun); }
+.meter[data-level="3"] i { background: var(--jade); }
+
+/* ── لینک‌های اختیاری ── */
+
+.links { display: grid; gap: 0.6rem; }
+
+.links__head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--s--1); color: var(--grey);
+}
+
+.links__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+
+.links__list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: var(--s--1);
+  background: var(--card);
+  animation: pane-in 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+
+.links__list a { color: var(--jade); direction: ltr; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.links__list button { color: var(--copper); font-size: 1.1rem; line-height: 1; flex: none; }
+
+.links__row { display: flex; gap: 0.5rem; }
+.links__row input { flex: 1; min-width: 0; }
+
+/* ── چیپ‌ها و دکمه‌ها ── */
+
+.chip {
+  font: inherit;
+  font-size: var(--s--1);
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  transition: background 0.25s, border-color 0.25s, transform 0.2s, color 0.25s;
+}
+
+.chip:hover { border-color: var(--jade); color: var(--jade); }
+.chip:active { transform: scale(0.96); }
+.chip--go { background: var(--jade); border-color: var(--jade); color: #fff; }
+.chip--go:hover { background: var(--jade-deep); border-color: var(--jade-deep); color: #fff; }
+.chip[disabled] { opacity: 0.4; cursor: default; }
+
+/* دکمه‌ی اصلی — باریک و ادیتوریال، نه درشت */
+.btn {
+  font: inherit;
+  font-size: var(--s--1);
+  letter-spacing: 0.06em;
+  position: relative;
+  overflow: hidden;
+  padding: 0.72rem 1.9rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  isolation: isolate;
+  transition: transform 0.2s, opacity 0.3s, box-shadow 0.3s;
+}
+
+.btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--jade);
+  transform: translateY(101%);
+  transition: transform 0.45s cubic-bezier(0.76,0,0.24,1);
+}
+
+.btn:hover::before { transform: none; }
+.btn:active { transform: scale(0.97); }
+
+.btn[disabled] { opacity: 0.32; cursor: default; }
+.btn[disabled]::before { display: none; }
+
+/* «هنوز آماده نیست» — کم‌رنگ ولی قابل زدن، تا بتواند دلیلش را بگوید */
+.btn.is-wait { opacity: 0.45; }
+.btn.is-wait::before { display: none; }
+
+/* پیام: چه چیزی برای ادامه مانده */
+.wiz__alert {
+  padding: 0.85rem 1.1rem;
+  border-radius: 1rem;
+  background: rgba(180, 92, 36, 0.09);
+  color: var(--copper);
+  font-size: var(--s--1);
+  line-height: 1.7;
+  animation: pane-in 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+
+.wiz__alert b { font-weight: 700; }
+
+/* پیکان کوچک که موقع هاور جلو می‌رود */
+.btn i {
+  font-style: normal;
+  display: inline-block;
+  margin-inline-start: 0.45rem;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+
+.btn:hover i { transform: translateX(-0.25rem); }
+
+.btn--ghost {
+  background: none;
+  color: var(--grey);
+  padding-inline: 0.9rem;
+}
+
+.btn--ghost::before { display: none; }
+.btn--ghost:hover { color: var(--ink); }
+.btn--ghost i { margin: 0 0 0 0.45rem; }
+.btn--ghost:hover i { transform: translateX(0.25rem); }
+
+/* ردیف دکمه‌ها: بازگشت سمتی، اقدام اصلی سمت دیگر */
+.wiz__nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 0.6rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--hair);
+}
+
+.wiz__nav .spacer { flex: 1; }
+
+/* ── نقشه ── */
+
+.mapbox { display: grid; gap: 0.6rem; }
+
+.mapbox__frame {
+  height: 15rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--film);
+  position: relative;
+}
+
+.mapbox__frame .leaflet-container { height: 100%; width: 100%; }
+
+.mapbox__off {
+  position: absolute; inset: 0;
+  display: grid; place-content: center; gap: 0.5rem;
+  text-align: center; padding: 1rem;
+  font-size: var(--s--1); color: var(--grey);
+}
+
+.mapbox__tools { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.mapbox__said {
+  font-size: var(--s--2);
+  color: var(--jade);
+  opacity: 0;
+  transform: translateY(0.3rem);
+  transition: opacity 0.35s, transform 0.35s;
+}
+
+.mapbox__said.is-on { opacity: 1; transform: none; }
+
+.fl__hint { display: block; margin-top: 0.3rem; font-size: var(--s--2); color: var(--grey); }
+
+.auth__foot { font-size: var(--s--1); color: var(--grey); }
+.auth__foot a { color: var(--jade); border-bottom: 1px solid currentColor; }

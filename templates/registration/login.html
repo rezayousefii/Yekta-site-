@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ورود — YEKTA{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}">{% endblock %}
+
+{% block content %}
+<div class="auth">
+
+  <aside class="auth__side">
+    <span class="auth__mark">YEKTA</span>
+
+    <div class="auth__pitch">
+      <span class="auth__bloom" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <g class="spin">
+            <ellipse cx="60" cy="30" rx="8" ry="24"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(45 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(90 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(135 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(180 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(225 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(270 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(315 60 60)"/>
+          </g>
+          <circle class="sun-core" cx="60" cy="60" r="19"/>
+          <circle class="sun-seed" cx="60" cy="60" r="10"/>
+        </svg>
+      </span>
+
+      <h2>خوش برگشتی.</h2>
+      <p>وارد شو تا وضعیت درخواست‌هایت را ببینی.</p>
+    </div>
+
+    <span></span>
+  </aside>
+
+  <main class="auth__main">
+    <div class="auth__head">
+      <h1 class="auth__title">ورود کارفرما</h1>
+      <p class="auth__sub">با ایمیل و رمزی که ثبت کرده‌ای.</p>
+    </div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="auth__errors">{{ form.non_field_errors }}</div>
+
+      <div style="display:grid; gap:1.15rem;">
+        {% for f in form %}
+          <label class="fl {% if f.errors %}has-error{% endif %}">
+            {{ f }}<span>{{ f.label }}</span>
+            {{ f.errors }}
+          </label>
+        {% endfor %}
+
+        <div class="wiz__nav">
+          <button type="submit" class="btn">ورود</button>
+        </div>
+      </div>
+    </form>
+
+    <p class="auth__foot">
+      <a href="{% url 'password_reset' %}">رمز عبور را فراموش کرده‌ای؟</a>
+    </p>
+
+    <p class="auth__foot">
+      حساب نداری؟ <a href="{% url 'signup' %}">ثبت‌نام کن</a>
+    </p>
+  </main>
+
+</div>
+{% endblock %}

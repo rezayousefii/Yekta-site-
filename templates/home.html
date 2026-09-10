@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
+
+{% block content %}
+
+<!-- ===== ساقه‌ی رونده (لایه‌ی شناور) ===== -->
+<div class="rail" aria-hidden="true">
+  <svg class="rail__svg" viewBox="0 0 40 1000" preserveAspectRatio="none">
+    <path class="rail__stem"
+          d="M20 0 C 31 110, 9 235, 20 360 C 31 485, 8 605, 20 730 C 30 835, 11 915, 20 1000"/>
+
+    <g class="rail__leaves">
+      <g class="rail__stalk"><g class="rail__leaf">
+        <path class="rail__blade" d="M0 0C9-12 24-10 30 0 24 10 9 12 0 0Z"/>
+        <path class="rail__vein" d="M3 0H26"/>
+      </g></g>
+      <g class="rail__stalk"><g class="rail__leaf">
+        <path class="rail__blade" d="M0 0C8-11 22-9 27 0 22 9 8 11 0 0Z"/>
+        <path class="rail__vein" d="M3 0H23"/>
+      </g></g>
+      <g class="rail__stalk"><g class="rail__leaf">
+        <path class="rail__blade" d="M0 0C9-12 24-10 30 0 24 10 9 12 0 0Z"/>
+        <path class="rail__vein" d="M3 0H26"/>
+      </g></g>
+      <g class="rail__stalk"><g class="rail__leaf">
+        <path class="rail__blade" d="M0 0C8-11 22-9 27 0 22 9 8 11 0 0Z"/>
+        <path class="rail__vein" d="M3 0H23"/>
+      </g></g>
+      <g class="rail__stalk"><g class="rail__leaf">
+        <path class="rail__blade" d="M0 0C9-12 24-10 30 0 24 10 9 12 0 0Z"/>
+        <path class="rail__vein" d="M3 0H26"/>
+      </g></g>
+      <g class="rail__stalk"><g class="rail__leaf">
+        <path class="rail__blade" d="M0 0C7-10 20-8 25 0 20 8 7 10 0 0Z"/>
+        <path class="rail__vein" d="M3 0H21"/>
+      </g></g>
+    </g>
+  </svg>
+
+  <div class="rail__flower">
+    <svg viewBox="0 0 120 120">
+      <g class="rail__petals">
+        <ellipse cx="60" cy="30" rx="8" ry="24"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(45 60 60)"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(90 60 60)"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(135 60 60)"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(180 60 60)"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(225 60 60)"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(270 60 60)"/>
+        <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(315 60 60)"/>
+      </g>
+      <circle class="sun-core" cx="60" cy="60" r="19"/>
+      <circle class="sun-seed" cx="60" cy="60" r="10"/>
+    </svg>
+  </div>
+</div>
+
+<div class="spine" aria-hidden="true">
+  <div class="spine__line"><span class="spine__dot"></span><span class="spine__num">00</span></div>
+</div>
+
+<!-- ===== هیرو ===== -->
+<section class="hero">
+  <div class="hero__pin">
+    <video class="hero__video" autoplay muted loop playsinline
+           {% if profile.hero_poster %}poster="{{ profile.hero_poster.url }}"{% endif %}>
+      {% if profile.hero_video %}<source src="{{ profile.hero_video.url }}" type="video/mp4">{% endif %}
+    </video>
+    <div class="hero__wash"></div>
+
+    <div class="hero__body">
+      <span class="bloom" aria-hidden="true">
+        <svg viewBox="0 0 120 200">
+          <path class="bloom__stem" d="M60 195 C60 160, 58 120, 60 84"/>
+          <path class="bloom__leaf bloom__leaf--a" d="M60 150c16-16 32-12 36-4-10 10-26 12-36 4Z"/>
+          <path class="bloom__leaf bloom__leaf--b" d="M60 122c-15-15-30-11-34-3 9 9 24 11 34 3Z"/>
+          <g class="bloom__head">
+            <g class="bloom__petals">
+              <ellipse cx="60" cy="32" rx="8" ry="24"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(30 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(60 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(90 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(120 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(150 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(180 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(210 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(240 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(270 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(300 60 62)"/>
+              <ellipse cx="60" cy="32" rx="8" ry="24" transform="rotate(330 60 62)"/>
+            </g>
+            <circle class="sun-core" cx="60" cy="62" r="19"/>
+            <circle class="sun-seed" cx="60" cy="62" r="10"/>
+          </g>
+        </svg>
+      </span>
+
+      <h1 class="hero__name">{{ profile.name_fa }}</h1>
+      <span class="hero__rule" aria-hidden="true"></span>
+      <p class="hero__line">{{ profile.tagline }}</p>
+    </div>
+
+    <p class="hero__cue">پایین بروید</p>
+  </div>
+</section>
+
+<div class="sheet">
+
+  <!-- جمله -->
+  <section class="band reveal">
+    <p class="lab">یکتا</p>
+    <div class="state">
+      <h2 class="say">
+        {% for w in statement_words %}<i{% if forloop.revcounter0 < 2 %} class="say__accent"{% endif %}>{{ w }}</i> {% endfor %}
+      </h2>
+      <div class="state__side">
+        <p class="state__text">{{ profile.about }}</p>
+        <div class="state__mini">
+          {% for m in minis %}<img src="{{ m.image.url }}" alt="{{ m.caption }}" onerror="this.style.visibility='hidden'">{% endfor %}
+        </div>
+        <span class="state__sign">YEKTA</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- حوزه‌ها — اسلایدر کمانی -->
+  <section class="arc reveal" id="fields">
+    <p class="lab">حوزه‌ها</p>
+
+    <div class="arc__stage" data-arc tabindex="0" role="group" aria-label="چرخاندن حوزه‌های کاری">
+      <span class="arc__ghost" data-arc-ghost aria-hidden="true">{{ fields.0.en }}</span>
+      <span class="arc__ring" aria-hidden="true"></span>
+
+      {% for f in fields %}
+        <button class="card" type="button" data-arc-card>
+          <span class="card__frame">
+            {% if f.image %}
+              <img src="{{ f.image.url }}" alt="{{ f.name_fa }}" draggable="false"
+                   style="object-fit:{{ f.fit }}" onerror="this.remove()">
+            {% endif %}
+          </span>
+          <span class="card__en">{{ f.en }}</span>
+          <span class="card__fa">{{ f.name_fa }}</span>
+          <span class="card__note">{{ f.note }}</span>
+        </button>
+      {% endfor %}
+
+      <span class="arc__pivot" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <g>
+            <ellipse cx="60" cy="30" rx="8" ry="24"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(45 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(90 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(135 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(180 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(225 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(270 60 60)"/>
+            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(315 60 60)"/>
+          </g>
+          <circle class="sun-core" cx="60" cy="60" r="19"/>
+          <circle class="sun-seed" cx="60" cy="60" r="10"/>
+        </svg>
+      </span>
+    </div>
+
+    <div class="arc__bar">
+      <button class="arc__nav" type="button" data-arc-go="-1" aria-label="حوزه‌ی قبل">‹</button>
+      <span class="arc__count"><b data-arc-now>۰۱</b> / <span data-arc-all></span></span>
+      <button class="arc__nav" type="button" data-arc-go="1" aria-label="حوزه‌ی بعد">›</button>
+    </div>
+
+    <button class="arc__all" type="button" data-arc-toggle
+            aria-expanded="false">نمایش همه‌ی حوزه‌ها</button>
+
+    <div class="fields" data-arc-list hidden>
+      {% for f in fields %}
+        <button class="fieldrow" type="button" data-i="{{ forloop.counter0 }}">
+          <span class="fieldrow__en">{{ f.en }}</span>
+          <span class="fieldrow__fa">{{ f.name_fa }}</span>
+        </button>
+      {% endfor %}
+      {% for f in fields_more %}
+        <span class="fieldrow">
+          <span class="fieldrow__en">{{ f.en }}</span>
+          <span class="fieldrow__fa">{{ f.name_fa }}</span>
+        </span>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- تخته‌ی کارها -->
+  <section class="band" id="works">
+    <p class="lab">کارها</p>
+    <div class="board">
+      {% for w in works %}
+        <button class="work reveal" data-name="{{ w.title }}"
+                data-shots='[{% for s in w.shots.all %}"{{ s.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+          <span class="work__frame">
+            {% if w.cover %}<img class="work__img" src="{{ w.cover.url }}" alt="{{ w.title }}">{% endif %}
+          </span>
+          <span class="work__cap">
+            <span class="work__name">{{ w.title }}</span>
+            <span class="work__meta">{{ w.meta }}</span>
+            <span class="work__more">دیدن قاب‌ها</span>
+          </span>
+        </button>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- عکس تمام‌عرض -->
+  {% if feature_a %}
+  <figure class="full">
+    <span class="full__in"><img data-par="52" src="{{ feature_a.image.url }}" alt="{{ feature_a.caption }}"></span>
+    <figcaption><span>{{ feature_a.caption }}</span><span>{{ feature_a.meta }}</span></figcaption>
+  </figure>
+  {% endif %}
+
+  <!-- لاین افقی -->
+  <section class="band band--flush reel reveal">
+    <p class="lab">قاب‌ها <span class="reel__hint">بکشید</span></p>
+    <div class="reel__wrap">
+      <div class="reel__track" data-reel>
+        {% for r in reel %}
+          <figure class="reel__item">
+            <span class="reel__frame"><img src="{{ r.image.url }}" alt="{{ r.caption }}" draggable="false"></span>
+            <figcaption>{{ r.caption }}</figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="reel__bar"><span class="reel__fill"></span></div>
+  </section>
+
+  <!-- بنر -->
+  <section class="banner reveal">
+    <span class="banner__word" aria-hidden="true">YEKTA</span>
+    {% if profile.banner_cut %}
+      <img class="banner__cut" src="{{ profile.banner_cut.url }}" alt="{{ profile.name_fa }}">
+    {% endif %}
+
+    <div class="banner__top">
+      <span class="banner__tag">MODEL</span>
+      <a class="banner__cta" href="#book">شروع همکاری</a>
+    </div>
+    <div></div>
+    <div class="banner__bot">
+      <span class="banner__who">
+        <span class="banner__name">{{ profile.name_fa }}</span>
+        <span class="banner__desc">{{ profile.tagline }}</span>
+      </span>
+      <span class="banner__note">
+        {% if minis.0 %}
+          <img class="banner__thumb" src="{{ minis.0.image.url }}" alt="">
+        {% endif %}
+        تاریخ آزاد را از بخش همکاری بردارید
+      </span>
+    </div>
+  </section>
+
+  <!-- دو عکس تمام‌عرض -->
+  <div class="duo">
+    {% for d in duo %}
+      <figure>
+        <span class="duo__frame"><img data-par="30" src="{{ d.image.url }}" alt="{{ d.caption }}"></span>
+        <figcaption>{{ d.caption }}</figcaption>
+      </figure>
+    {% endfor %}
+  </div>
+
+  <!-- ادیتوریال -->
+  <section class="band band--bone reveal">
+    <p class="lab">ادیتوریال</p>
+
+    {% if plate %}
+    <figure class="plate">
+      <span class="plate__in"><img data-par="34" src="{{ plate.image.url }}" alt="{{ plate.caption }}"></span>
+      <figcaption class="plate__cap"><span>{{ plate.caption }}</span><span>{{ plate.meta }}</span></figcaption>
+    </figure>
+    {% endif %}
+  </section>
+
+  <section class="band band--bone covers reveal" style="padding-top:0">
+    {% for c in covers %}
+      <figure class="cover">
+        <span class="cover__frame"><img src="{{ c.image.url }}" alt="{{ c.caption }}"></span>
+        <figcaption>
+          <span class="cover__name">{{ c.caption }}</span>
+          <span class="cover__pub">{{ c.meta }}</span>
+        </figcaption>
+      </figure>
+    {% endfor %}
+  </section>
+
+  <a class="arch" href="#works"><span>دیدن همه‌ی کارها</span><span class="arch__plus">+</span></a>
+
+  <!-- عکس تمام‌عرض -->
+  {% if feature_b %}
+  <figure class="full">
+    <span class="full__in"><img data-par="52" src="{{ feature_b.image.url }}" alt="{{ feature_b.caption }}"></span>
+    <figcaption><span>{{ feature_b.caption }}</span><span>{{ feature_b.meta }}</span></figcaption>
+  </figure>
+  {% endif %}
+
+  <div class="band--bone marq" aria-hidden="true">
+    <div class="marq__row">
+      <span>YEKTA</span><span>YEKTA</span><span>YEKTA</span><span>YEKTA</span>
+      <span>YEKTA</span><span>YEKTA</span><span>YEKTA</span><span>YEKTA</span>
+    </div>
+  </div>
+
+  <!-- مشخصات -->
+  <section class="band reveal">
+    <p class="lab">مشخصات</p>
+    <dl class="specs">
+      {% for s in specs %}<div class="spec"><dt>{{ s.k }}</dt><dd>{{ s.v }}</dd></div>{% endfor %}
+    </dl>
+  </section>
+
+  <!-- تقویم -->
+  <section class="band band--jade reveal" id="book">
+    <p class="lab">همکاری</p>
+
+    <div class="cal" data-end="{{ day_end }}" data-max="{{ max_hours }}">
+      <div class="cal__tabs">
+        <button class="cal__tab is-on" data-tab="week">این هفته</button>
+        <button class="cal__tab" data-tab="month">این ماه</button>
+      </div>
+
+      <div class="cal__main">
+        <div>
+          <div class="cal__pane" data-pane="week">
+            <div class="week">
+              {% for d in week %}
+                <div class="wday {% if d.free %}wday--free{% else %}wday--busy{% endif %}"
+                     data-day="{{ d.name }}">
+                  <span class="wday__n">{{ d.name }}</span>
+                  <span class="wday__s">{% if d.free %}آزاد{% else %}رزرو شده{% endif %}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="cal__pane" data-pane="month" hidden>
+            <div class="cal__head">
+              <button class="cal__arrow" data-go="prev" aria-label="ماه قبل">‹</button>
+              <span class="cal__month"></span>
+              <button class="cal__arrow" data-go="next" aria-label="ماه بعد">›</button>
+            </div>
+            <div class="cal__grid"></div>
+          </div>
+        </div>
+
+        <div class="cal__slots">
+          <h3>ساعت شروع</h3>
+          <div class="slots">
+            {% for t in times %}<button class="slot" data-h="{{ t.h }}">{{ t.fa }}</button>{% endfor %}
+          </div>
+        </div>
+
+        <div class="cal__dur" hidden>
+          <h3>تا ساعت</h3>
+          <div class="durs"></div>
+        </div>
+      </div>
+
+      <div class="cal__foot">
+        <span class="cal__sum"></span>
+        <button class="cal__go" disabled>ادامه</button>
+      </div>
+    </div>
+
+    <p class="book__note">
+      روزهای نشان‌دار آزادند. برای ثبت نهایی باید حساب کارفرما بسازید؛
+      هر درخواست تا یک روز اعتبار دارد.
+    </p>
+  </section>
+
+  {{ months|json_script:"cal-data" }}
+
+  <!-- برندها -->
+  <section class="band reveal">
+    <p class="lab">همکاری با</p>
+    <div class="brand-grid">
+      {% for b in brands %}
+        <div class="brand-tile">
+          <span class="brand-tile__mark">
+            {% if b.logo %}
+              <img src="{{ b.logo.url }}" alt="{{ b.name }}" loading="lazy">
+            {% else %}
+              <b>{{ b.name|first }}</b>
+            {% endif %}
+          </span>
+          <span class="brand-tile__name">{{ b.name }}</span>
+        </div>
+      {% empty %}
+        <p class="brand-grid__empty">به‌زودی</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- دعوت -->
+  <section class="band join reveal" id="join" style="padding-top:0">
+    <h2 class="join__title">برای رزرو تاریخ، حساب کارفرما بسازید.</h2>
+    <a class="join__btn" href="{% url 'signup' %}">ثبت‌نام کارفرما</a>
+    <p class="join__soon">ثبت‌نام مدل و عکاس به‌زودی اضافه می‌شود.</p>
+  </section>
+
+</div>
+
+<div class="box">
+  <div class="box__head">
+    <span class="box__name"></span>
+    <button class="box__close">بستن</button>
+  </div>
+  <div class="box__track"></div>
+  <div class="box__rail"><span class="box__fill"></span></div>
+</div>
+
+{% endblock %}
+
+{% block js %}<script src="{% static 'js/home.js' %}"></script>{% endblock %}
