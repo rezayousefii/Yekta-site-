@@ -437,6 +437,7 @@ class Migration(migrations.Migration):
             field=models.SlugField(
                 allow_unicode=True,
                 blank=True,
+                db_index=False,
                 default="",
                 max_length=60,
                 verbose_name="نشانی صفحه",
