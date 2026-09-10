@@ -128,10 +128,13 @@ if env("DATABASE_URL"):
         }
     }
 else:
+    # بدون DATABASE_URL (یعنی بدون خرید دیتابیس جدا)، همان SQLite ساده کافی
+    # است. تنها نکته: اگر SQLITE_PATH را روی دیسکِ دائمی (همان‌جایی که
+    # MEDIA_ROOT هم هست) بگذاری، فایل دیتابیس با هر دیپلوی پاک نمی‌شود.
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': Path(env("SQLITE_PATH", BASE_DIR / 'db.sqlite3')),
         }
     }
 
