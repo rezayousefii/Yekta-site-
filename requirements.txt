@@ -1,13 +1,13 @@
-# ── هسته ──
+# -- core --
 Django==5.2.*
-Pillow>=11,<13            # پردازش تصویرهای آپلودی (ImageField بدون این کار نمی‌کند)
+Pillow>=11,<13            # image processing for uploads (ImageField needs this)
 
-# ── سرور و فایل‌های استاتیک ──
+# -- server and static files --
 gunicorn>=23,<24
-whitenoise>=6.8,<7        # سرو استاتیک بدون nginx جدا
+whitenoise>=6.8,<7        # serves static files without a separate nginx
 
-# ── دیتابیس سرور ──
-psycopg[binary]>=3.2,<4   # PostgreSQL؛ روی SQLite لازم نیست
+# -- server database --
+psycopg[binary]>=3.2,<4   # PostgreSQL; not needed on SQLite
 
-# ── امنیت بیشتر (اختیاری ولی توصیه‌شده) ──
-argon2-cffi>=23,<26       # بعد از نصب، خط Argon2 را در PASSWORD_HASHERS از کامنت دربیاور
+# -- extra security (optional but recommended) --
+argon2-cffi>=23,<26       # after installing, uncomment the Argon2 line in PASSWORD_HASHERS
