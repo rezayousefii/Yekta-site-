@@ -1,0 +1,11 @@
+{% extends "admin/index.html" %}
+{% load dash %}
+
+{# صفحه‌ی اول پنل جنگو: اول یک نگاه به آمار، بعد فهرست همیشگی بخش‌ها.
+   نامش عمداً index.html نیست: قالبی که هم‌نام خودش را extends کند،
+   بی‌نهایت بار خودش را صدا می‌زند. admin.site.index_template به این
+   اشاره می‌کند. #}
+{% block content %}
+  {% yekta_dashboard %}
+  {{ block.super }}
+{% endblock %}

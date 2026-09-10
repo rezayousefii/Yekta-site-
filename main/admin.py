@@ -21,6 +21,9 @@ admin.site.site_header = "مدیریت سایت یکتا"
 admin.site.site_title  = "یکتا"
 admin.site.index_title = "بخش‌ها"
 
+# صفحه‌ی اول پنل، با نمودار بازدید و پرکلیک‌ترین قاب‌ها بالای فهرست بخش‌ها
+admin.site.index_template = "admin/yekta_index.html"
+
 
 def thumb(image, size=54):
     if not image:

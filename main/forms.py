@@ -539,7 +539,11 @@ class AdminInviteForm(forms.Form):
         account.phone = d.get("phone")
         account.role = d["level"]
         account.email_verified = True
-        account.is_staff = True
+
+        # فقط مدیر کامل به پنل جنگو راه دارد. یکتا با نقش MODEL به پنل
+        # استودیو می‌رود؛ دادن is_staff به او فقط یک پنلِ خالی و گیج‌کننده
+        # باز می‌کرد، بی‌آنکه کاری اضافه کند.
+        account.is_staff = (d["level"] == Account.OWNER)
         account.is_superuser = (d["level"] == Account.OWNER)
         account.save()
         return account
