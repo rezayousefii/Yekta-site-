@@ -1,7 +1,7 @@
 {
   "platform": "django",
   "port": 8000,
-  "app": "yekta",
+  "app": "tender-proskuriakova",
   "django": {
     "collectStatic": true,
     "compileMessages": false,
