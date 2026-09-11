@@ -19,6 +19,6 @@
     "25 20 * * * cd /usr/src/app && python manage.py nightly_report"
   ],
   "build": {
-    "cache": false
+    "cache": true
   }
 }
