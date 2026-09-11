@@ -1,7 +1,7 @@
 {
   "platform": "django",
   "port": 8000,
-  "app": "tender-proskuriakova",
+  "app": "tender-proskuriakova-7cqdz3tae",
   "django": {
     "collectStatic": true,
     "compileMessages": false,
@@ -19,6 +19,6 @@
     "25 20 * * * cd /usr/src/app && python manage.py nightly_report"
   ],
   "build": {
-    "cache": true
+    "cache": false
   }
 }
