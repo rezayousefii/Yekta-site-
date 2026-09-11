@@ -239,19 +239,29 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = Path(env("MEDIA_ROOT", BASE_DIR / 'media'))
 
+# بعضی سرویس‌های میزبانی (مثل لیارا)، collectstatic را در یک محیطِ
+# build جدا اجرا می‌کنند که env varهای پنل (از جمله DJANGO_DEBUG) را
+# نمی‌بیند — پس نمی‌شود به DEBUG برای انتخاب نوع ذخیره‌سازیِ استاتیک
+# اعتماد کرد؛ ممکن است در زمانِ build یک چیز باشد و در زمانِ اجرا چیز
+# دیگر. اگر آن build مانیفست نساخته باشد، فایل‌های هش‌دار اصلاً روی
+# دیسک وجود ندارند — پس ساختنِ آدرسِ هش‌دار (حتی بدونِ کرش‌کردن) بازهم
+# ۴۰۴ می‌دهد. راهِ درست این است که وقتی مانیفستی نیست، اصلاً سراغِ
+# ذخیره‌سازیِ هش‌دار نرویم و ساده و بدونِ هش برگردیم — دقیقاً هم‌خوان با
+# چیزی که collectstatic واقعاً روی دیسک ساخته.
+_static_manifest_exists = (STATIC_ROOT / 'staticfiles.json').exists()
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
         "BACKEND": ("whitenoise.storage.CompressedManifestStaticFilesStorage"
-                    if (not DEBUG and 'whitenoise.middleware.WhiteNoiseMiddleware' in MIDDLEWARE)
+                    if (_static_manifest_exists and 'whitenoise.middleware.WhiteNoiseMiddleware' in MIDDLEWARE)
                     else "django.contrib.staticfiles.storage.StaticFilesStorage"),
     },
 }
 
-# اگر روی سرور، DEBUG موقعِ build (نه runtime) هنوز درست ست نشده باشد یا
-# لایه‌ی build کش شود، ممکن است مانیفستِ استاتیک با فایل‌های واقعی
-# هم‌خوانی نداشته باشد. به‌جای ۵۰۰شدنِ کل صفحه برای یک فایلِ گمشده در
-# مانیفست، فقط همان یکی آدرسِ بدونِ هش برمی‌گردد.
+# لایه‌ی ایمنیِ اضافه: حتی اگر مانیفست موجود باشد ولی یک فایل خاص را کم
+# داشته باشد (مثلاً یک build نصفه‌کاره)، به‌جای ۵۰۰شدنِ کل صفحه، فقط
+# همان یکی آدرسِ بدونِ هش برمی‌گردد.
 WHITENOISE_MANIFEST_STRICT = False
 
 # سقف حجم آپلود در حافظه — بالاتر از این، روی دیسک نوشته می‌شود
