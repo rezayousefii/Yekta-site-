@@ -9,8 +9,8 @@
 
 from django.core.management.base import BaseCommand
 
-from main.models import (BookingSettings, Brand, Field, Profile, TimeSlot, WeekdayRule)
-
+from main.models import (BookingSettings, CollabKind, Field, ModelType, Place,
+                         Profile, TimeSlot, WeekdayRule)
 
 FIELDS = [
     ("Fashion",      "مدل لباس",     "کمپین و لوک‌بوک",  True),
@@ -27,6 +27,34 @@ FIELDS = [
     ("Promotional",  "نمایشگاهی",    "",                 False),
 ]
 
+MODEL_TYPES = [
+    ("لباس", "پوشاک روزمره و مجلسی"),
+    ("عروس", "مزون، آتلیه و لباس عروس"),
+    ("فشن", "کمپین و ادیتوریال مد"),
+    ("زیورآلات", "دست، گردن و جزئیات"),
+    ("آرایشی", "پوست، مو و گریم"),
+    ("ورزشی", "اکتیو و اسپرت"),
+    ("کت‌واک", "شو و رونمایی"),
+]
+
+PLACES = [
+    ("استودیو", "نور کنترل‌شده، پس‌زمینه‌ی ثابت"),
+    ("خیابانی", "فضای شهری و طبیعی"),
+    ("فضای باز", "طبیعت، ساحل، کویر"),
+    ("فروشگاه", "ویترین و داخل مغازه"),
+    ("مزون", "آتلیه و سالن"),
+    ("رویداد", "نمایشگاه و شو"),
+]
+
+KINDS = [
+    ("عکاسی", "یک جلسه‌ی عکس"),
+    ("روزانه", "یک روز کامل در اختیار پروژه"),
+    ("قراردادی", "همکاری بلندمدت با قرارداد"),
+    ("ویدیو و تیزر", "فیلم‌برداری تبلیغاتی"),
+    ("کت‌واک", "حضور در شو"),
+    ("رویداد", "حضور در نمایشگاه یا افتتاحیه"),
+]
+
 # شنبه = ۰ … جمعه = ۶
 OPEN_DAYS = {0, 3, 4, 6}
 
@@ -39,9 +67,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         made = []
 
-        # پروفایل
         profile = Profile.load()
-        if not profile.height:
+        if not profile.statement:
             profile.statement = "پروژه‌هایم را خودم انتخاب می‌کنم و سر وقت سر صحنه‌ام."
             profile.about = ("کار با برندهای پوشاک، زیورآلات و کمپین‌های تبلیغاتی. "
                              "هر قاب یک تصمیم است، نه یک اتفاق.")
@@ -49,11 +76,9 @@ class Command(BaseCommand):
             profile.save()
             made.append("پروفایل")
 
-        # تنظیمات رزرو
         BookingSettings.load()
         made.append("تنظیمات رزرو")
 
-        # حوزه‌ها
         n = 0
         for i, (en, name_fa, note, on_arc) in enumerate(FIELDS):
             _, created = Field.objects.get_or_create(
@@ -62,9 +87,17 @@ class Command(BaseCommand):
             )
             n += 1 if created else 0
         if n:
-            made.append("%d حوزه" % n)
+            made.append("%d مجموعه" % n)
 
-        # الگوی هفتگی
+        for model, rows in ((ModelType, MODEL_TYPES), (Place, PLACES), (CollabKind, KINDS)):
+            n = 0
+            for i, (name, note) in enumerate(rows):
+                _, created = model.objects.get_or_create(
+                    name=name, defaults={"note": note, "order": i})
+                n += 1 if created else 0
+            if n:
+                made.append("%d %s" % (n, model._meta.verbose_name))
+
         n = 0
         for wd in range(7):
             _, created = WeekdayRule.objects.get_or_create(
@@ -74,7 +107,6 @@ class Command(BaseCommand):
         if n:
             made.append("%d روز هفته" % n)
 
-        # ساعت‌ها
         n = 0
         for h in HOURS:
             _, created = TimeSlot.objects.get_or_create(hour=h, defaults={"is_active": True})
@@ -87,4 +119,4 @@ class Command(BaseCommand):
         else:
             self.stdout.write("همه‌چیز از قبل موجود بود؛ تغییری داده نشد.")
 
-        self.stdout.write("قدم بعد: از پنل، تصویرها و کارها را اضافه کن.")
+        self.stdout.write("قدم بعد: از پنل استودیو عکس‌ها را اضافه کن.")

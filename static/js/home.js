@@ -1,4 +1,6 @@
-/* ===== یکتا — موتور صفحه اول ===== */
+/* ===== یکتا — موتور صفحه‌ی اول ===== */
+/* تم و نوار بالا در base.js هستند (چون روی همه‌ی صفحه‌ها لازم‌اند).
+   اینجا فقط چیزهایی است که مخصوص صفحه‌ی اول‌اند. */
 
 (function () {
   'use strict';
@@ -11,47 +13,6 @@
   }
 
   function pad2(n) { return faNum(n < 10 ? '0' + n : n); }
-
-  /* ================= دارک مود ================= */
-
-  var wave  = document.querySelector('.wave');
-  var lamps = document.querySelectorAll('[data-lamp]');
-
-  try { if (localStorage.getItem('yekta-theme') === 'dark') doc.classList.add('dark'); } catch (e) {}
-
-  function flip(origin) {
-    var next = !doc.classList.contains('dark');
-    var b = origin.getBoundingClientRect();
-
-    wave.style.setProperty('--wx', (b.left + b.width / 2) + 'px');
-    wave.style.setProperty('--wy', (b.top + b.height / 2) + 'px');
-    wave.style.setProperty('--wave-bg', next ? '#0B0E0D' : '#FBFAF7');
-    wave.style.setProperty('--flash', next ? 'var(--copper)' : 'var(--sun)');
-    wave.classList.add('is-on');
-
-    lamps.forEach(function (l) { l.classList.add('is-firing'); });
-    setTimeout(function () { lamps.forEach(function (l) { l.classList.remove('is-firing'); }); }, 330);
-
-    setTimeout(function () {
-      doc.classList.toggle('dark', next);
-      try { localStorage.setItem('yekta-theme', next ? 'dark' : 'light'); } catch (e) {}
-    }, 190);
-
-    setTimeout(function () { wave.classList.remove('is-on'); }, 430);
-  }
-
-  lamps.forEach(function (el) { el.addEventListener('click', function () { flip(el); }); });
-
-  /* ================= نوار بالا ================= */
-
-  var lastY = window.scrollY;
-
-  function nav(y) {
-    if (!bar) return;
-    if (y > lastY + 6 && y > 140) bar.classList.add('is-hidden');
-    else if (y < lastY - 6)       bar.classList.remove('is-hidden');
-    bar.classList.toggle('is-solid', y > window.innerHeight * 0.82);
-  }
 
   /* ================= ساقه و پارالاکس ================= */
 
@@ -67,6 +28,7 @@
   var pin    = document.querySelector('.hero__pin');
   var floats = document.querySelectorAll('[data-par]');
   var banner = document.querySelector('.banner');
+  var pitch  = document.querySelector('[data-pitch]');
   var bar    = document.querySelector('.bar');
 
   /* جای هر برگ روی مسیر ساقه و سمتی که باز می‌شود */
@@ -79,7 +41,6 @@
   var barH = bar ? bar.offsetHeight : 54;   /* گل از وسط نوار بالا راه می‌افتد */
   var kx = 1, ky = 1, topPad = 0;
 
-  /* ضریب تبدیل مختصات ویوباکس به پیکسل — چون preserveAspectRatio خاموش است */
   /* ماتریس تبدیل مختصات ویوباکس به پیکسلِ واقعیِ صفحه.
      چون rail از نوع fixed است، با اسکرول عوض نمی‌شود و یک‌بار گرفتنش کافی است. */
   var ctm = null, railBox = null;
@@ -144,8 +105,7 @@
     setTimeout(function () { p.remove(); }, 3400);
   }
 
-  /* گل را دقیقاً روی نقطه‌ی p از طول ساقه می‌نشاند — جدا از frame() چون این
-     یکی با p هموارشده (flowerP) صدا زده می‌شود، نه p خام اسکرول. */
+  /* گل را دقیقاً روی نقطه‌ی p از طول ساقه می‌نشاند */
   function placeFlowerAt(pp) {
     if (!flower || !stem || !stemLen) return;
 
@@ -240,6 +200,18 @@
         banner.style.setProperty('--cy',  (m * -18).toFixed(1) + 'px');
       }
     }
+
+    /* بلوک دعوت: هرچه به مرکز صفحه نزدیک‌تر می‌شود، صاف‌تر می‌ایستد و
+       بالا می‌آید — انگار از کف صفحه بلند می‌شود. */
+    if (pitch) {
+      var pb = pitch.getBoundingClientRect();
+      if (pb.bottom > -200 && pb.top < vh + 200) {
+        var t = (pb.top + pb.height / 2 - vh / 2) / vh;
+        var clamped = Math.max(-1, Math.min(1, t));
+        pitch.style.setProperty('--tiltx', (clamped * 5).toFixed(2) + 'deg');
+        pitch.style.setProperty('--liftup', (Math.abs(clamped) * 14).toFixed(1) + 'px');
+      }
+    }
   }
 
   gauge();
@@ -248,6 +220,7 @@
 
   var busy = false;
   var calm = null;
+  var lastY = window.scrollY;
 
   window.addEventListener('scroll', function () {
     var y = window.scrollY;
@@ -260,7 +233,6 @@
       if (flower) flower.style.setProperty('--tilt', '0deg');
     }, 260);
 
-    nav(y);
     if (!busy) {
       busy = true;
       requestAnimationFrame(function () { frame(y); busy = false; });
@@ -271,7 +243,6 @@
   window.addEventListener('resize', function () { gauge(); frame(window.scrollY); });
   window.addEventListener('load', function () { gauge(); frame(window.scrollY); });
   frame(window.scrollY);
-  nav(window.scrollY);
 
   /* ================= ظاهر شدن ================= */
 
@@ -286,11 +257,11 @@
         r.target.classList.add('is-in');
         io.unobserve(r.target);
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
     reveal.forEach(function (el) { io.observe(el); });
   }
 
-  /* ================= کشیدن افقی (لاین و لایت‌باکس) ================= */
+  /* ================= کشیدن افقی ================= */
 
   var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
@@ -337,9 +308,145 @@
       if (t - lt > 16) { vx = (e.pageX - lx) / (t - lt); lx = e.pageX; lt = t; }
     });
 
+    /* اگر کاربر کشیده باشد، کلیک نباید لینک را باز کند */
     el.addEventListener('click', function (e) {
       if (moved > 6) { e.preventDefault(); e.stopPropagation(); }
     }, true);
+
+    el.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  }
+
+  /* ================= اسلایدر نیم‌دار مجموعه‌ها ================= */
+
+  var deck = document.querySelector('[data-deck]');
+
+  if (deck) {
+    var slides = [].slice.call(deck.querySelectorAll('[data-slide]'));
+    var nowEl  = document.querySelector('[data-deck-now]');
+    var allEl  = document.querySelector('[data-deck-all]');
+    var fillEl = document.querySelector('[data-deck-fill]');
+    var goBtns = document.querySelectorAll('[data-deck-go]');
+    var ghost  = document.querySelector('[data-deck-ghost]');
+
+    if (allEl) allEl.textContent = pad2(slides.length);
+
+    dragScroll(deck);
+
+    /* در راست‌به‌چپ، scrollLeft منفی می‌شود؛ همه‌جا با قدر مطلق کار می‌کنیم
+       تا کد یک‌بار نوشته شود و در هر دو جهت درست بماند. */
+    function deckPos() {
+      var max = deck.scrollWidth - deck.clientWidth;
+      return { v: Math.abs(deck.scrollLeft), max: max };
+    }
+
+    function nearest() {
+      var box = deck.getBoundingClientRect();
+      var mid = box.left + box.width / 2;
+      var best = 0, bestD = Infinity;
+
+      slides.forEach(function (s, i) {
+        var r = s.getBoundingClientRect();
+        var d = Math.abs(r.left + r.width / 2 - mid);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+
+      return best;
+    }
+
+    var cur = -1;
+
+    function paintDeck() {
+      var k = nearest();
+
+      if (k !== cur) {
+        var first = cur === -1;
+        cur = k;
+
+        if (nowEl) nowEl.textContent = pad2(k + 1);
+        goBtns.forEach(function (b) {
+          var dir = parseInt(b.dataset.deckGo, 10);
+          b.disabled = (dir < 0 && k === 0) || (dir > 0 && k === slides.length - 1);
+        });
+
+        /* اسم انگلیسیِ گنده‌ی پشت صحنه با تعویض کارت مرکزی عوض می‌شود —
+           همان امضای بصریِ اسلایدر قدیم، این‌بار روی اسلایدر نیم‌دار.
+           بار اول (بارگذاری صفحه) بی‌سروصدا می‌نشیند، بدون انیمیشن تعویض. */
+        if (ghost) {
+          var enEl = slides[k].querySelector('.slide__en');
+          var name = enEl ? enEl.textContent.trim() : '';
+
+          if (first || soft) {
+            ghost.textContent = name;
+          } else {
+            ghost.classList.remove('is-swap');
+            void ghost.offsetWidth;
+            ghost.classList.add('is-swap');
+            setTimeout(function () { ghost.textContent = name; }, 165);
+          }
+        }
+      }
+
+      if (fillEl) {
+        var p = deckPos();
+        fillEl.style.width = (p.max > 0 ? Math.min(100, (p.v / p.max) * 100) : 100) + '%';
+      }
+
+      /* اسلایدهای کناری کمی کوچک‌تر و کم‌رنگ‌ترند: عمق می‌سازد و
+         نگاه را روی اسلاید وسط نگه می‌دارد. */
+      if (soft) return;
+
+      var box = deck.getBoundingClientRect();
+      var mid = box.left + box.width / 2;
+      var half = box.width / 2 || 1;
+
+      slides.forEach(function (s) {
+        var r = s.getBoundingClientRect();
+        if (r.right < box.left - 100 || r.left > box.right + 100) return;
+
+        var d = (r.left + r.width / 2 - mid) / half;
+        if (d > 1.4) d = 1.4; else if (d < -1.4) d = -1.4;
+        var a = Math.abs(d);
+
+        s.style.transform = 'translate3d(0,' + (a * a * 13).toFixed(1) + 'px,0) ' +
+                            'scale(' + (1 - a * 0.06).toFixed(3) + ')';
+        s.style.opacity = (1 - a * 0.3).toFixed(3);
+      });
+    }
+
+    var dtick = false;
+    deck.addEventListener('scroll', function () {
+      if (dtick) return;
+      dtick = true;
+      requestAnimationFrame(function () { paintDeck(); dtick = false; });
+    }, { passive: true });
+
+    goBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = Math.max(0, Math.min(slides.length - 1, cur + parseInt(b.dataset.deckGo, 10)));
+        slides[k].scrollIntoView({ behavior: soft ? 'auto' : 'smooth',
+                                   block: 'nearest', inline: 'center' });
+      });
+    });
+
+    paintDeck();
+    window.addEventListener('resize', paintDeck);
+    window.addEventListener('load', paintDeck);
+  }
+
+  /* ================= نوار متحرک عکس‌ها ================= */
+  /* سرعت را از روی پهنای واقعی نوار حساب می‌کنیم، نه یک عدد ثابت: با کم و
+     زیاد شدن عکس‌ها، سرعتِ حرکت یکسان می‌ماند. */
+
+  var strip = document.querySelector('[data-strip-row]');
+
+  if (strip && !soft) {
+    var tuneStrip = function () {
+      var w = strip.scrollWidth / 2;
+      if (w > 0) strip.style.setProperty('--dur', Math.round(w / 34) + 's');
+    };
+    tuneStrip();
+    window.addEventListener('load', tuneStrip);
+    window.addEventListener('resize', tuneStrip);
   }
 
   /* ================= لاین افقی ================= */
@@ -353,7 +460,7 @@
     var rtick = false;
     var items = [].slice.call(reel.querySelectorAll('.reel__item'));
 
-    function reelPaint() {
+    var reelPaint = function () {
       var box = reel.getBoundingClientRect();
       var mid = box.left + box.width / 2;
       var half = box.width / 2 || 1;
@@ -379,10 +486,9 @@
 
       if (!reelFill) return;
       var m = reel.scrollWidth - reel.clientWidth;
-      /* در حالت راست‌به‌چپ scrollLeft منفی می‌شود */
       var v = Math.abs(reel.scrollLeft);
       reelFill.style.width = (m > 0 ? Math.min(100, (v / m) * 100) : 0) + '%';
-    }
+    };
 
     reel.addEventListener('scroll', function () {
       if (rtick) return;
@@ -395,463 +501,4 @@
     window.addEventListener('load', reelPaint);
   }
 
-  /* ================= اسلایدر کمانی حوزه‌ها ================= */
-
-  var stage = document.querySelector('[data-arc]');
-
-  if (stage) {
-    var cards  = [].slice.call(stage.querySelectorAll('[data-arc-card]'));
-    var ghost  = stage.querySelector('[data-arc-ghost]');
-    var pivot  = stage.querySelector('.arc__pivot svg');
-    var nowEl  = document.querySelector('[data-arc-now]');
-    var allEl  = document.querySelector('[data-arc-all]');
-    var goBtns = document.querySelectorAll('[data-arc-go]');
-    var toggle = document.querySelector('[data-arc-toggle]');
-    var list   = document.querySelector('[data-arc-list]');
-    var rows   = list ? list.querySelectorAll('.fieldrow[data-i]') : [];
-
-    var n = cards.length;
-
-    if (n) {
-      var STEP  = 24 * Math.PI / 180;   /* فاصله‌ی زاویه‌ای دو کارت */
-      var DEG   = 24;
-      var R     = 300;
-      var pxStep = 120;
-
-      var pos = 0, target = 0, vel = 0, spread = 0, raf = null, cur = -1;
-      var ready = false;
-
-      if (allEl) allEl.textContent = pad2(n);
-
-      function measure() {
-        R = Math.max(265, Math.min(560, stage.clientWidth * 0.78));
-        pxStep = R * Math.sin(STEP);
-        var h = cards[0].offsetHeight || 260;
-        stage.style.setProperty('--R', R.toFixed(0) + 'px');
-        stage.style.setProperty('--ringtop', (h / 2).toFixed(0) + 'px');
-      }
-
-      function announce(k) {
-        if (cur === k) return;
-        var first = cur === -1;
-        cur = k;
-
-        cards.forEach(function (el, i) { el.classList.toggle('is-on', i === k); });
-
-        if (nowEl) nowEl.textContent = pad2(k + 1);
-
-        if (ghost && !first) {
-          var name = cards[k].querySelector('.card__en').textContent.trim();
-          ghost.classList.remove('is-swap');
-          void ghost.offsetWidth;
-          ghost.classList.add('is-swap');
-          setTimeout(function () { ghost.textContent = name; }, 165);
-        }
-
-        rows.forEach(function (r) { r.classList.toggle('is-on', +r.dataset.i === k); });
-
-        goBtns.forEach(function (b) {
-          var dir = parseInt(b.dataset.arcGo, 10);
-          b.disabled = (dir < 0 && k === 0) || (dir > 0 && k === n - 1);
-        });
-      }
-
-      function layout() {
-        for (var i = 0; i < n; i++) {
-          var el = cards[i];
-          var d  = i - pos;
-          var ad = Math.abs(d);
-
-          if (ad > 2.8) {
-            el.style.opacity = '0';
-            el.style.visibility = 'hidden';
-            el.style.pointerEvents = 'none';
-            continue;
-          }
-
-          el.style.visibility = 'visible';
-          el.style.pointerEvents = 'auto';
-
-          var a  = d * STEP;
-          var x  = R * Math.sin(a) * spread;
-          var y  = R * (1 - Math.cos(a)) * spread;
-          var sc = (1 - Math.min(ad, 3) * 0.16) * (0.88 + 0.12 * spread);
-
-          el.style.transform =
-            'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) ' +
-            'rotate(' + (d * DEG * spread).toFixed(2) + 'deg) ' +
-            'scale(' + sc.toFixed(3) + ')';
-
-          el.style.opacity = (Math.max(0, 1 - ad * 0.36) * spread).toFixed(3);
-          el.style.zIndex  = String(50 - Math.round(ad * 10));
-        }
-
-        if (pivot) pivot.style.setProperty('--spin', (pos * 46).toFixed(1) + 'deg');
-
-        announce(Math.max(0, Math.min(n - 1, Math.round(pos))));
-      }
-
-      /* فنر نرم — فقط وقتی حرکتی هست کار می‌کند */
-      function tick() {
-        var d = target - pos;
-        vel = vel * 0.76 + d * 0.17;
-        pos += vel;
-
-        if (spread < 1) spread = Math.min(1, spread + (soft ? 1 : 0.042));
-
-        if (spread >= 1 && Math.abs(d) < 0.0007 && Math.abs(vel) < 0.0007) {
-          pos = target; vel = 0; ready = true;
-          layout(); raf = null; return;
-        }
-
-        layout();
-        raf = requestAnimationFrame(tick);
-      }
-
-      function run() { if (!raf) raf = requestAnimationFrame(tick); }
-
-      function goTo(k) {
-        target = Math.max(0, Math.min(n - 1, k));
-        run();
-      }
-
-      measure();
-      layout();
-
-      /* باز شدنِ بادبزنی وقتی بخش وارد کادر می‌شود */
-      if (!('IntersectionObserver' in window) || soft) {
-        spread = 1; ready = true; layout();
-      } else {
-        var aio = new IntersectionObserver(function (rw) {
-          rw.forEach(function (r) {
-            if (!r.isIntersecting) return;
-            aio.disconnect();
-            run();
-          });
-        }, { threshold: 0.2 });
-        aio.observe(stage);
-      }
-
-      /* ---- کشیدن ---- */
-      var down = false, sx = 0, p0 = 0, lx = 0, lt = 0, vpx = 0, moved = 0;
-
-      function grab(e) {
-        if (!ready) return;
-        down = true; moved = 0;
-        sx = e.clientX; p0 = pos; lx = e.clientX; lt = Date.now(); vpx = 0;
-        vel = 0;
-        if (raf) { cancelAnimationFrame(raf); raf = null; }
-        stage.classList.add('is-drag');
-        if (stage.setPointerCapture && e.pointerId != null) {
-          try { stage.setPointerCapture(e.pointerId); } catch (err) {}
-        }
-      }
-
-      function move(e) {
-        if (!down) return;
-        var dx = e.clientX - sx;
-        moved = Math.abs(dx);
-        pos = Math.max(-0.65, Math.min(n - 1 + 0.65, p0 - dx / pxStep));
-        var t = Date.now();
-        if (t - lt > 20) { vpx = (e.clientX - lx) / (t - lt); lx = e.clientX; lt = t; }
-        layout();
-      }
-
-      function release() {
-        if (!down) return;
-        down = false;
-        stage.classList.remove('is-drag');
-        var flick = -vpx * 130 / pxStep;
-        flick = Math.max(-1.5, Math.min(1.5, flick));
-        goTo(Math.round(pos + flick));
-      }
-
-      stage.addEventListener('pointerdown', grab);
-      stage.addEventListener('pointermove', move);
-      stage.addEventListener('pointerup', release);
-      stage.addEventListener('pointercancel', release);
-      stage.addEventListener('lostpointercapture', release);
-      stage.addEventListener('dragstart', function (e) { e.preventDefault(); });
-
-      /* ---- کلیک روی کارت ---- */
-      cards.forEach(function (el, i) {
-        el.addEventListener('click', function (e) {
-          if (moved > 6) { e.preventDefault(); return; }
-          if (i === cur) { location.hash = '#works'; return; }
-          goTo(i);
-        });
-      });
-
-      /* ---- دکمه‌ها، کیبورد، ترک‌پد ---- */
-      goBtns.forEach(function (b) {
-        b.addEventListener('click', function () {
-          goTo(cur + parseInt(b.dataset.arcGo, 10));
-        });
-      });
-
-      stage.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowLeft')  { e.preventDefault(); goTo(cur + 1); }
-        if (e.key === 'ArrowRight') { e.preventDefault(); goTo(cur - 1); }
-      });
-
-      stage.addEventListener('wheel', function (e) {
-        if (Math.abs(e.deltaX) < 6 || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-        e.preventDefault();
-        goTo(cur + (e.deltaX > 0 ? 1 : -1));
-      }, { passive: false });
-
-      window.addEventListener('resize', function () { measure(); layout(); });
-
-      /* ---- فهرست همه‌ی حوزه‌ها ---- */
-      if (toggle && list) {
-        toggle.addEventListener('click', function () {
-          var open = list.hasAttribute('hidden');
-          if (open) {
-            list.removeAttribute('hidden');
-            /* انیمیشن ردیف‌ها دوباره پخش شود */
-            list.querySelectorAll('.fieldrow').forEach(function (r) {
-              r.style.animation = 'none';
-              void r.offsetWidth;
-              r.style.animation = '';
-            });
-          } else {
-            list.setAttribute('hidden', '');
-          }
-          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-          toggle.textContent = open ? 'بستن فهرست' : 'نمایش همه‌ی حوزه‌ها';
-        });
-
-        rows.forEach(function (r) {
-          r.addEventListener('click', function () { goTo(+r.dataset.i); });
-        });
-      }
-    }
-  }
-
-  /* ================= تقویم ================= */
-
-  var cal = document.querySelector('.cal');
-
-  if (cal) {
-    var months = JSON.parse(document.getElementById('cal-data').textContent);
-    var idx = 0, pickDay = null, pickTime = null, pickHour = null, pickEnd = null;
-
-    var dayEnd  = parseInt(cal.dataset.end, 10) || 19;
-    var maxHour = parseInt(cal.dataset.max, 10) || 4;
-
-    var durBox = cal.querySelector('.cal__dur');
-    var durs   = cal.querySelector('.durs');
-
-    function fa(n) {
-      return String(n).replace(/[0-9]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[+d]; });
-    }
-
-    function clock(h) { return fa(h < 10 ? '0' + h : h) + ':۰۰'; }
-
-    /* بعد از انتخاب ساعت شروع، گزینه‌های «تا ساعت» ساخته می‌شوند */
-    function buildDurs() {
-      if (!durs || pickHour === null) return;
-      var n = Math.min(maxHour, dayEnd - pickHour);
-      var html = '';
-
-      for (var i = 1; i <= n; i++) {
-        html += '<button class="dur" data-h="' + i + '">' +
-                  '<span class="dur__t">' + clock(pickHour + i) + '</span>' +
-                  '<span class="dur__h">' + fa(i) + ' ساعت</span>' +
-                '</button>';
-      }
-
-      durs.innerHTML = html;
-      durBox.hidden = false;
-      cal.classList.add('is-dur');
-    }
-
-    function clearDurs() {
-      pickEnd = null;
-      if (!durs) return;
-      durs.innerHTML = '';
-      durBox.hidden = true;
-      cal.classList.remove('is-dur');
-    }
-
-    var grid  = cal.querySelector('.cal__grid');
-    var label = cal.querySelector('.cal__month');
-    var prev  = cal.querySelector('[data-go="prev"]');
-    var next  = cal.querySelector('[data-go="next"]');
-    var sum   = cal.querySelector('.cal__sum');
-    var go    = cal.querySelector('.cal__go');
-
-    var WD = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-
-    function draw() {
-      var m = months[idx];
-      label.textContent = m.label;
-      prev.disabled = idx === 0;
-      next.disabled = idx === months.length - 1;
-
-      var html = WD.map(function (w) { return '<div class="cal__wd">' + w + '</div>'; }).join('');
-
-      m.cells.forEach(function (c) {
-        if (!c.d) { html += '<div class="cal__cell"></div>'; return; }
-        var cls = 'cal__day';
-        if (c.past)      cls += ' cal__day--past';
-        else if (c.free) cls += ' cal__day--free';
-        else             cls += ' cal__day--busy';
-        if (c.today) cls += ' cal__today';
-        html += '<div class="cal__cell"><button class="' + cls + '" data-free="' +
-                (c.free && !c.past ? 1 : 0) + '"><span>' + c.fa + '</span></button></div>';
-      });
-
-      grid.innerHTML = html;
-    }
-
-    function say() {
-      go.disabled = true;
-
-      if (!pickDay) { sum.innerHTML = 'یک روز آزاد را انتخاب کنید.'; return; }
-      if (!pickTime) { sum.innerHTML = '<b>' + pickDay + '</b> — ساعت شروع را انتخاب کنید.'; return; }
-
-      if (!pickEnd) {
-        sum.innerHTML = '<b>' + pickDay + '</b>، از <b>' + pickTime + '</b> — تا چه ساعتی؟';
-        return;
-      }
-
-      sum.innerHTML = '<b>' + pickDay + '</b>، از <b>' + pickTime + '</b> تا <b>' +
-                      clock(pickEnd) + '</b> (' + fa(pickEnd - pickHour) + ' ساعت)';
-      go.disabled = false;
-    }
-
-    grid.addEventListener('click', function (e) {
-      var b = e.target.closest('.cal__day');
-      if (!b || b.dataset.free !== '1') return;
-      grid.querySelectorAll('.cal__day').forEach(function (x) { x.classList.remove('is-pick'); });
-      b.classList.add('is-pick');
-      pickDay = b.querySelector('span').textContent + ' ' + months[idx].label;
-      say();
-    });
-
-    function resetTime() {
-      pickTime = null; pickHour = null;
-      cal.querySelectorAll('.slot').forEach(function (x) { x.classList.remove('is-pick'); });
-      clearDurs();
-    }
-
-    prev.addEventListener('click', function () { if (idx > 0) { idx--; pickDay = null; resetTime(); draw(); say(); } });
-    next.addEventListener('click', function () { if (idx < months.length - 1) { idx++; pickDay = null; resetTime(); draw(); say(); } });
-
-    cal.querySelectorAll('.slot').forEach(function (el) {
-      el.addEventListener('click', function () {
-        cal.querySelectorAll('.slot').forEach(function (x) { x.classList.remove('is-pick'); });
-        el.classList.add('is-pick');
-        pickTime = el.textContent.trim();
-        pickHour = parseInt(el.dataset.h, 10);
-        clearDurs();
-        buildDurs();
-        say();
-      });
-    });
-
-    if (durs) {
-      durs.addEventListener('click', function (e) {
-        var b = e.target.closest('.dur');
-        if (!b) return;
-        durs.querySelectorAll('.dur').forEach(function (x) { x.classList.remove('is-pick'); });
-        b.classList.add('is-pick');
-        pickEnd = pickHour + parseInt(b.dataset.h, 10);
-        say();
-      });
-    }
-
-    cal.querySelectorAll('.cal__tab').forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        cal.querySelectorAll('.cal__tab').forEach(function (t) { t.classList.remove('is-on'); });
-        tab.classList.add('is-on');
-        cal.querySelectorAll('.cal__pane').forEach(function (p) {
-          p.hidden = p.dataset.pane !== tab.dataset.tab;
-        });
-      });
-    });
-
-    cal.querySelectorAll('.wday--free').forEach(function (w) {
-      w.addEventListener('click', function () {
-        cal.querySelectorAll('.wday').forEach(function (x) { x.classList.remove('is-pick'); });
-        w.classList.add('is-pick');
-        pickDay = w.dataset.day;
-        say();
-      });
-    });
-
-    draw();
-    say();
-  }
-
-  /* ================= لایت‌باکس ================= */
-
-  var box    = document.querySelector('.box');
-  var track  = document.querySelector('.box__track');
-  var nameEl = document.querySelector('.box__name');
-  var fill   = document.querySelector('.box__fill');
-
-  function paint() {
-    if (!track) return;
-    var b  = track.getBoundingClientRect();
-    var cx = b.left + b.width / 2;
-
-    track.querySelectorAll('.shot').forEach(function (s) {
-      var r = s.getBoundingClientRect();
-      var d = (r.left + r.width / 2) - cx;
-      var k = Math.max(-1.6, Math.min(1.6, d / (b.width * 0.42)));
-      var a = Math.abs(k);
-      s.style.transform =
-        'rotateY(' + (-k * 30) + 'deg) translateZ(' + (-a * 120) + 'px) scale(' + (1 - a * 0.1) + ')';
-      s.style.filter  = 'blur(' + (a * 2).toFixed(2) + 'px) brightness(' + (1 - a * 0.22) + ')';
-      s.style.opacity = String(Math.max(0.3, 1 - a * 0.45));
-      s.style.zIndex  = String(100 - Math.round(a * 100));
-    });
-
-    if (fill) {
-      var m = track.scrollWidth - track.clientWidth;
-      var v = Math.abs(track.scrollLeft);
-      fill.style.width = (m > 0 ? (v / m) * 100 : 0) + '%';
-    }
-  }
-
-  function openBox(name, shots) {
-    if (!box) return;
-    nameEl.textContent = name;
-    track.innerHTML = shots.map(function (src) {
-      return '<div class="shot"><img src="' + src + '" alt="" draggable="false"></div>';
-    }).join('');
-    box.classList.add('is-open');
-    document.body.classList.add('is-locked');
-    track.scrollLeft = 0;
-    setTimeout(paint, 80);
-  }
-
-  function closeBox() {
-    if (!box) return;
-    box.classList.remove('is-open');
-    document.body.classList.remove('is-locked');
-  }
-
-  document.querySelectorAll('.work').forEach(function (w) {
-    w.addEventListener('click', function () {
-      openBox(w.dataset.name || '', JSON.parse(w.dataset.shots || '[]'));
-    });
-  });
-
-  var closer = document.querySelector('.box__close');
-  if (closer) closer.addEventListener('click', closeBox);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeBox(); });
-
-  if (track) {
-    var tick = false;
-    track.addEventListener('scroll', function () {
-      if (tick) return;
-      tick = true;
-      requestAnimationFrame(function () { paint(); tick = false; });
-    }, { passive: true });
-
-    dragScroll(track);
-  }
 })();

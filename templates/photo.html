@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ shot.label }} — YEKTA{% endblock %}
+{% block desc %}{{ shot.story|default:shot.label|truncatechars:150 }}{% endblock %}
+{% block og_image %}{% if shot.src %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ shot.src }}">{% endif %}{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/gallery.css' %}">{% endblock %}
+{% block body_class %}has-top{% endblock %}
+
+{% block content %}
+
+<!-- نوار بازگشت: چسبیده می‌ماند تا کاربر هر جای صفحه که باشد راه برگشت
+     و راه رفتن به بقیه‌ی سایت را جلوی چشمش داشته باشد. -->
+<div class="shotbar">
+  <a class="shotbar__back" href="{{ back }}">
+    <i aria-hidden="true">&rarr;</i>
+    <span>{% if shot.field %}{{ shot.field.name_fa }}{% else %}فعالیت‌ها{% endif %}</span>
+  </a>
+
+  <div class="shotbar__links">
+    <a href="{% url 'gallery' %}">همه‌ی فعالیت‌ها</a>
+    <a href="{% url 'home' %}">خانه</a>
+  </div>
+</div>
+
+<article class="shot">
+  <figure class="shot__figure">
+    <img class="shot__img" src="{{ shot.src }}" alt="{{ shot.label }}">
+  </figure>
+
+  <div class="shot__side">
+    {% if shot.field %}
+      <a class="shot__tag" href="{% url 'collection' shot.field.slug %}">{{ shot.field.name_fa }}</a>
+    {% endif %}
+
+    <h1 class="shot__title">{{ shot.label }}</h1>
+
+    {% if shot.story %}
+      <p class="shot__story">{{ shot.story|linebreaksbr }}</p>
+    {% else %}
+      <p class="shot__story shot__story--thin">
+        توضیحی برای این قاب ثبت نشده. اگر سبکش را می‌پسندی، از دکمه‌ی زیر
+        درخواست همکاری بفرست تا درباره‌اش حرف بزنیم.
+      </p>
+    {% endif %}
+
+    <dl class="shot__facts">
+      {% if shot.brand %}<div><dt>برند</dt><dd>{{ shot.brand }}</dd></div>{% endif %}
+      {% if shot.photographer %}<div><dt>عکاس</dt><dd>{{ shot.photographer }}</dd></div>{% endif %}
+      {% if shot.year %}<div><dt>سال</dt><dd>{{ shot.year }}</dd></div>{% endif %}
+      {% if shot.model_type %}
+        <div><dt>نوع مدلینگ</dt>
+          <dd><a href="{% url 'gallery' %}?type={{ shot.model_type.slug }}">{{ shot.model_type.name }}</a></dd>
+        </div>
+      {% endif %}
+      {% if shot.place %}
+        <div><dt>محل</dt>
+          <dd><a href="{% url 'gallery' %}?place={{ shot.place.slug }}">{{ shot.place.name }}</a></dd>
+        </div>
+      {% endif %}
+    </dl>
+
+    <!-- گزینه‌ی همکاری، دقیقاً زیر توضیح — همان‌جا که کاربر تصمیم می‌گیرد.
+         انتخاب‌های همین قاب به‌عنوان پیش‌فرض به ویزارد برده می‌شوند. -->
+    <a class="shot__cta"
+       href="{% url 'collab' %}?{% if shot.model_type %}type={{ shot.model_type.slug }}{% endif %}{% if shot.place %}&amp;place={{ shot.place.slug }}{% endif %}">
+      <span>درخواست همکاری در همین سبک</span>
+      <i aria-hidden="true">&larr;</i>
+    </a>
+
+    <p class="shot__hint">پایین‌تر، بقیه‌ی قاب‌های همین مجموعه ادامه دارد.</p>
+  </div>
+</article>
+
+{% if siblings %}
+<section class="shot__more">
+  <p class="lab">
+    {% if shot.field %}بقیه‌ی «{{ shot.field.name_fa }}»{% else %}قاب‌های دیگر{% endif %}
+  </p>
+  {% include "partials/masonry.html" with photos=siblings %}
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block js %}<script src="{% static 'js/gallery.js' %}"></script>{% endblock %}

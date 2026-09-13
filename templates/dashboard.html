@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static fa %}
 
 {% block title %}پیشخوان — YEKTA{% endblock %}
 
 {% block css %}<link rel="stylesheet" href="{% static 'css/panel.css' %}">{% endblock %}
+{% block body_class %}has-top{% endblock %}
 
 {% block content %}
 <div class="pan">
@@ -48,9 +49,8 @@
     </div>
 
     <p class="pan__where">
-      اینجا اتاق خصوصی توست: هر درخواست همکاری که برای یکتا می‌فرستی و هر پاسخی
-      که می‌گیری، همین‌جا می‌ماند. تقویم و نمونه‌کارها در صفحه‌ی اصلی هستند —
-      از «ابزارها» پایین‌تر یک‌کلیک می‌روی.
+      این‌جا اتاق خصوصی توست: هر درخواستی که برای یکتا می‌فرستی و هر پاسخی
+      که می‌گیری همین‌جا می‌ماند — و می‌توانی همین‌جا هم جوابش را بدهی.
     </p>
 
     <div class="chips">
@@ -65,14 +65,18 @@
       {% endif %}
 
       {% if upcoming %}
-        <span class="chip-s">نزدیک‌ترین آفیش: {{ upcoming.date }} — {{ upcoming.span }}</span>
+        <span class="chip-s">نزدیک‌ترین آفیش: {{ upcoming.date|jdate }} — {{ upcoming.span }}</span>
       {% endif %}
     </div>
+
+    <a class="pan__new" href="{% url 'collab' %}">
+      <span>درخواست همکاری تازه</span><i aria-hidden="true">&larr;</i>
+    </a>
 
   </header>
 
   <!-- ═══════ شمارنده‌ها ═══════ -->
-  <section class="figs" data-rise aria-label="یک نگاه کلی">
+  <section class="figs hairgrid" data-rise aria-label="یک نگاه کلی">
     <div class="fig">
       <b data-count="{{ counts.all }}">۰</b>
       <span>کل درخواست‌ها</span>
@@ -87,7 +91,7 @@
     </div>
     <div class="fig">
       <b data-count="{{ unread }}">۰</b>
-      <span>پیام نخوانده</span>
+      <span>پیام تازه</span>
     </div>
   </section>
 
@@ -96,117 +100,111 @@
     <p class="crumb" style="margin-bottom:0.9rem;">ابزارها</p>
 
     <div class="tools">
-
-      <a class="tool" href="{% url 'home' %}#book">
+      <a class="tool" href="{% url 'collab' %}">
         <span class="tool__go">درخواست همکاری تازه <i>&larr;</i></span>
-        <span class="tool__hint">صفحه‌ی اصلی › بخش «همکاری» — روز و ساعت را از تقویم بردار</span>
+        <span class="tool__hint">نوع همکاری، محل، بودجه و تاریخ — در پنج قدم کوتاه</span>
       </a>
 
-      <a class="tool" href="{% url 'home' %}#book">
-        <span class="tool__go">تقویم آفیش یکتا <i>&larr;</i></span>
-        <span class="tool__hint">ببین کدام روزها آزاد است، پیش از آنکه وقت بگیری</span>
+      <a class="tool" href="{% url 'gallery' %}">
+        <span class="tool__go">فعالیت‌های یکتا <i>&larr;</i></span>
+        <span class="tool__hint">قاب‌به‌قاب، با فیلتر نوع مدلینگ و محل</span>
       </a>
 
-      <a class="tool" href="{% url 'home' %}#works">
-        <span class="tool__go">نمونه‌کارها <i>&larr;</i></span>
-        <span class="tool__hint">صفحه‌ی اصلی › بخش «کارها» — قاب‌به‌قاب</span>
+      <a class="tool" href="{% url 'support' %}">
+        <span class="tool__go">پشتیبانی <i>&larr;</i></span>
+        <span class="tool__hint">سوالی داری که به یک درخواست مشخص ربط ندارد؟</span>
       </a>
 
-      <a class="tool" href="{% url 'home' %}#fields">
-        <span class="tool__go">حوزه‌های کاری <i>&larr;</i></span>
-        <span class="tool__hint">ببین یکتا در چه سبک‌هایی کار می‌کند</span>
+      <a class="tool" href="{% url 'password_reset' %}">
+        <span class="tool__go">تغییر رمز عبور <i>&larr;</i></span>
+        <span class="tool__hint">لینک تغییر رمز به ایمیلت فرستاده می‌شود</span>
       </a>
 
-      <span class="tool tool--off">
-        <span class="tool__go">ویرایش اطلاعات برند <i>&larr;</i></span>
-        <span class="tool__hint">به‌زودی — فعلاً برای تغییر، از همین صفحه به یکتا پیام بده</span>
-      </span>
-
-      <a class="tool" href="{% url 'logout' %}">
-        <span class="tool__go">خروج از حساب <i>&larr;</i></span>
-        <span class="tool__hint">دفعه‌ی بعد با همان ایمیل و رمز برمی‌گردی</span>
+      <a class="tool" href="{% url 'home' %}">
+        <span class="tool__go">صفحه‌ی اول <i>&larr;</i></span>
+        <span class="tool__hint">برگرد به سایت</span>
       </a>
 
+      <form class="tool" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="tool__go" type="submit">خروج از حساب <i>&larr;</i></button>
+        <span class="tool__hint">دفعه‌ی بعد با همان ایمیل یا شماره برمی‌گردی</span>
+      </form>
     </div>
   </section>
 
-  <!-- ═══════ درخواست‌ها و گفتگو ═══════ -->
-  <div class="pans">
+  <!-- ═══════ درخواست‌ها ═══════ -->
+  <section class="pane" data-rise>
+    <div class="pane__head">
+      <h2 class="pane__title">درخواست‌های من</h2>
+      <span class="pane__n">{{ counts.all|fa }} مورد</span>
+    </div>
 
-    <section class="pane" data-rise>
-      <div class="pane__head">
-        <h2 class="pane__title">درخواست‌های من</h2>
-        <span class="pane__n">{{ counts.all }} مورد</span>
-      </div>
+    {% if requests %}
+      {% for r in requests %}
+        <article class="rq">
+          <div class="rq__top">
+            <span class="rq__when"><b>{{ r.date|jdate }}</b> — {{ r.span }}</span>
+            <span class="tag tag--{{ r.status }}">{{ r.get_status_display }}</span>
+          </div>
 
-      {% if requests %}
-        <div>
-          {% for r in requests %}
-            <article class="rq">
-              <div class="rq__top">
-                <span class="rq__when"><b>{{ r.date }}</b> — {{ r.span }}</span>
-                <span class="tag tag--{{ r.status }}">{{ r.get_status_display }}</span>
+          <p class="rq__meta">
+            {% if r.kind %}{{ r.kind.name }}{% endif %}
+            {% if r.model_type %} · {{ r.model_type.name }}{% endif %}
+            {% if r.place_ref %} · {{ r.place_ref.name }}{% endif %}
+            · {{ r.budget_text }}
+          </p>
+
+          {% if r.brief %}<p class="rq__brief">{{ r.brief|truncatechars:160 }}</p>{% endif %}
+
+          <!-- گفتگوی همین درخواست، همین‌جا: کارفرما لازم نیست جایی برود -->
+          {% if r.messages.all %}
+            <details class="rq__chat">
+              <summary>گفتگو ({{ r.messages.all|length|fa }} پیام)</summary>
+              <div class="chat">
+                {% for m in r.messages.all %}
+                  {% if not m.hidden %}
+                    <div class="bub bub--{{ m.sender }}">
+                      <p>{{ m.body|linebreaksbr }}</p>
+                      <span>{{ m.get_sender_display }} · {{ m.created|date:"Y/m/d — H:i" }}</span>
+                    </div>
+                  {% endif %}
+                {% endfor %}
               </div>
-              <p class="rq__meta">
-                {% if r.field %}{{ r.field.name_fa }}{% else %}بدون حوزه‌ی مشخص{% endif %}
-                {% if r.place %} · {{ r.place }}{% endif %}
-                {% if r.budget %} · {{ r.budget }}{% endif %}
-              </p>
-              {% if r.reply %}<p class="rq__meta">پاسخ یکتا: {{ r.reply }}</p>{% endif %}
-            </article>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="void">
-          <svg viewBox="0 0 60 60" aria-hidden="true">
-            <path class="void__seed" d="M30 52V30"/>
-            <path class="void__seed" d="M30 34c-9 0-14-6-14-13 8 0 14 5 14 13z"/>
-            <path class="void__seed" d="M30 30c9-1 14-7 13-14-8 0-13 6-13 14z"/>
-            <circle class="void__sun" cx="30" cy="14" r="5"/>
-          </svg>
-          <h3>هنوز هیچ درخواستی نداری</h3>
-          <p>
-            وقتی روز و ساعتی را از تقویم انتخاب کنی و بفرستی، همان لحظه اینجا
-            یک ردیف ساخته می‌شود و وضعیتش را زنده دنبال می‌کنی.
-          </p>
-          <a href="{% url 'home' %}#book">اولین درخواست را بفرست</a>
-        </div>
-      {% endif %}
-    </section>
+            </details>
+          {% endif %}
 
-    <section class="pane" data-rise>
-      <div class="pane__head">
-        <h2 class="pane__title">گفتگو با یکتا</h2>
-        <span class="pane__n">{% if unread %}{{ unread }} نخوانده{% else %}به‌روز{% endif %}</span>
+          <form class="rq__reply" method="post" action="{% url 'dashboard_reply' r.pk %}">
+            {% csrf_token %}
+            <input type="text" name="body" placeholder="پیامی برای یکتا…" maxlength="2000">
+            <button type="submit">فرستادن</button>
+          </form>
+
+          {% if r.status == 'pending' %}
+            <form method="post" action="{% url 'cancel_request' r.pk %}" class="rq__cancel">
+              {% csrf_token %}
+              <button type="submit" data-confirm="این درخواست لغو شود؟">لغو درخواست</button>
+            </form>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="void">
+        <svg viewBox="0 0 60 60" aria-hidden="true">
+          <path class="void__seed" d="M30 52V30"/>
+          <path class="void__seed" d="M30 34c-9 0-14-6-14-13 8 0 14 5 14 13z"/>
+          <path class="void__seed" d="M30 30c9-1 14-7 13-14-8 0-13 6-13 14z"/>
+          <circle class="void__sun" cx="30" cy="14" r="5"/>
+        </svg>
+        <h3>هنوز هیچ درخواستی نداری</h3>
+        <p>
+          نوع همکاری، محل، بودجه و تاریخ را انتخاب کن و بفرست — همان لحظه
+          اینجا یک ردیف ساخته می‌شود و وضعیتش را زنده دنبال می‌کنی.
+        </p>
+        <a href="{% url 'collab' %}">اولین درخواست را بفرست</a>
       </div>
-
-      {% if msgs %}
-        <div>
-          {% for m in msgs %}
-            <article class="ms-row {% if m.sender == 'model' and not m.read_at %}ms-row--new{% endif %}">
-              <p class="ms-row__who">{{ m.get_sender_display }} · {{ m.created|date:"Y/m/d" }}</p>
-              <p class="ms-row__body">{{ m.body }}</p>
-            </article>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="void">
-          <svg viewBox="0 0 60 60" aria-hidden="true">
-            <path class="void__seed" d="M12 18h36v22H30l-10 8v-8h-8z"/>
-            <circle class="void__sun" cx="24" cy="29" r="2.6"/>
-            <circle class="void__sun" cx="32" cy="29" r="2.6"/>
-            <circle class="void__sun" cx="40" cy="29" r="2.6"/>
-          </svg>
-          <h3>صندوق پیام خالی است</h3>
-          <p>
-            گفتگو با ثبت اولین درخواست باز می‌شود. پاسخ یکتا — تایید، رد، یا
-            پیشنهاد زمان جایگزین — همین‌جا می‌نشیند و پاک هم نمی‌شود.
-          </p>
-        </div>
-      {% endif %}
-    </section>
-
-  </div>
+    {% endif %}
+  </section>
 
   <!-- ═══════ کارت برند ═══════ -->
   {% if employer %}
@@ -221,6 +219,7 @@
         <div class="idc__row"><dt>حیطه</dt><dd>{{ employer.get_activity_display }}</dd></div>
         <div class="idc__row"><dt>رابط پروژه</dt><dd>{{ employer.contact_name }}</dd></div>
         <div class="idc__row"><dt>شماره تماس</dt><dd dir="ltr">{{ employer.phone }}</dd></div>
+        <div class="idc__row"><dt>ایمیل</dt><dd dir="ltr">{{ user.email }}</dd></div>
         {% if employer.instagram %}
           <div class="idc__row">
             <dt>اینستاگرام</dt>
@@ -252,13 +251,13 @@
       </dl>
 
       <p class="idc__note">
-        این همان اطلاعاتی است که هنگام ثبت‌نام دادی و یکتا موقع بررسی درخواست
-        می‌بیند. برای اصلاحش فعلاً کافی است در گفتگو بنویسی.
+        همان اطلاعاتی که هنگام ثبت‌نام دادی. برای اصلاحش در گفتگوی یکی از
+        درخواست‌ها بنویس، یا از <a href="{% url 'support' %}">پشتیبانی</a> بگو.
       </p>
     </section>
   {% endif %}
 
-  <a class="pan__out" href="{% url 'logout' %}">خروج از حساب</a>
-
 </div>
 {% endblock %}
+
+{% block js %}<script src="{% static 'js/studio.js' %}"></script>{% endblock %}

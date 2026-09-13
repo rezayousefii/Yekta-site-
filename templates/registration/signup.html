@@ -132,6 +132,14 @@
         {{ form.lng }}
       </fieldset>
 
+      {% comment %}
+        تله‌ی ربات: کاربر این را نمی‌بیند؛ ربات‌هایی که همه‌ی فیلدها را پر
+        می‌کنند، خودشان را لو می‌دهند و ثبت‌نامشان رد می‌شود.
+      {% endcomment %}
+      <div class="sr-trap" aria-hidden="true">
+        <label>وب‌سایت{{ form.website }}</label>
+      </div>
+
       <div class="wiz__nav">
         <button type="button" class="btn btn--ghost" data-back hidden><i>&rarr;</i> بازگشت</button>
         <span class="spacer"></span>

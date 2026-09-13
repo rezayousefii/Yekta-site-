@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static fa %}
 
 {% block css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
 
@@ -100,6 +100,11 @@
       <h1 class="hero__name">{{ profile.name_fa }}</h1>
       <span class="hero__rule" aria-hidden="true"></span>
       <p class="hero__line">{{ profile.tagline }}</p>
+
+      <div class="hero__acts">
+        <a class="hero__go" href="{% url 'collab' %}">شروع همکاری</a>
+        <a class="hero__alt" href="{% url 'gallery' %}">دیدن فعالیت‌ها</a>
+      </div>
     </div>
 
     <p class="hero__cue">پایین بروید</p>
@@ -107,6 +112,59 @@
 </section>
 
 <div class="sheet">
+
+  <!-- ===== اسلایدر نیم‌دار مجموعه‌ها ===== -->
+  <!-- هر اسلاید یک مجموعه است؛ نیمی از اسلاید بعدی پیداست تا کاربر بفهمد
+       ادامه دارد و بکشد. کلیک روی هرکدام، صفحه‌ی همان مجموعه را باز می‌کند. -->
+  <section class="deck reveal" id="fields" aria-label="مجموعه‌ها">
+    <span class="deck__ghost" data-deck-ghost aria-hidden="true">{{ slides.0.en }}</span>
+
+    <div class="deck__head">
+      <p class="lab">مجموعه‌ها</p>
+      <div class="deck__nav">
+        <button class="deck__arrow" type="button" data-deck-go="-1" aria-label="قبلی">‹</button>
+        <span class="deck__count"><b data-deck-now>۰۱</b> / <span data-deck-all></span></span>
+        <button class="deck__arrow" type="button" data-deck-go="1" aria-label="بعدی">›</button>
+      </div>
+    </div>
+
+    <div class="deck__track" data-deck>
+      {% for f in slides %}
+        <a class="slide" href="{% url 'collection' f.slug %}" data-slide>
+          <span class="slide__frame">
+            {% if f.cover_url %}
+              <img src="{{ f.cover_url }}" alt="{{ f.name_fa }}" loading="lazy"
+                   style="object-fit:{{ f.fit }}" draggable="false">
+            {% endif %}
+            <span class="slide__veil" aria-hidden="true"></span>
+          </span>
+
+          <span class="slide__text">
+            <span class="slide__en">{{ f.en }}</span>
+            <span class="slide__fa">{{ f.name_fa }}</span>
+            <span class="slide__note">{{ f.note }}</span>
+          </span>
+
+          <span class="slide__go">
+            <span>{{ f.photo_count|fa }} قاب</span>
+            <i aria-hidden="true">&larr;</i>
+          </span>
+        </a>
+      {% empty %}
+        <p class="deck__empty">هنوز مجموعه‌ای ساخته نشده.</p>
+      {% endfor %}
+    </div>
+
+    <div class="deck__rail"><span class="deck__fill" data-deck-fill></span></div>
+
+    {% if fields_more %}
+      <div class="deck__more">
+        {% for f in fields_more %}
+          <a class="pill" href="{% url 'collection' f.slug %}">{{ f.name_fa }}</a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
 
   <!-- جمله -->
   <section class="band reveal">
@@ -118,124 +176,93 @@
       <div class="state__side">
         <p class="state__text">{{ profile.about }}</p>
         <div class="state__mini">
-          {% for m in minis %}<img src="{{ m.image.url }}" alt="{{ m.caption }}" onerror="this.style.visibility='hidden'">{% endfor %}
+          {% for m in minis %}
+            <a href="{{ m.href }}"><img src="{{ m.image.url }}" alt="{{ m.caption }}" loading="lazy"></a>
+          {% endfor %}
         </div>
         <span class="state__sign">YEKTA</span>
       </div>
     </div>
   </section>
 
-  <!-- حوزه‌ها — اسلایدر کمانی -->
-  <section class="arc reveal" id="fields">
-    <p class="lab">حوزه‌ها</p>
+  <!-- ===== نوار متحرک عکس‌های یکتا ===== -->
+  {% if strip %}
+  <section class="band band--flush strip reveal" aria-label="قاب‌های یکتا">
+    <p class="lab">قاب‌ها <span class="strip__hint">همیشه در حرکت</span></p>
 
-    <div class="arc__stage" data-arc tabindex="0" role="group" aria-label="چرخاندن حوزه‌های کاری">
-      <span class="arc__ghost" data-arc-ghost aria-hidden="true">{{ fields.0.en }}</span>
-      <span class="arc__ring" aria-hidden="true"></span>
-
-      {% for f in fields %}
-        <button class="card" type="button" data-arc-card>
-          <span class="card__frame">
-            {% if f.image %}
-              <img src="{{ f.image.url }}" alt="{{ f.name_fa }}" draggable="false"
-                   style="object-fit:{{ f.fit }}" onerror="this.remove()">
-            {% endif %}
-          </span>
-          <span class="card__en">{{ f.en }}</span>
-          <span class="card__fa">{{ f.name_fa }}</span>
-          <span class="card__note">{{ f.note }}</span>
-        </button>
-      {% endfor %}
-
-      <span class="arc__pivot" aria-hidden="true">
-        <svg viewBox="0 0 120 120">
-          <g>
-            <ellipse cx="60" cy="30" rx="8" ry="24"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(45 60 60)"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(90 60 60)"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(135 60 60)"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(180 60 60)"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(225 60 60)"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(270 60 60)"/>
-            <ellipse cx="60" cy="30" rx="8" ry="24" transform="rotate(315 60 60)"/>
-          </g>
-          <circle class="sun-core" cx="60" cy="60" r="19"/>
-          <circle class="sun-seed" cx="60" cy="60" r="10"/>
-        </svg>
-      </span>
-    </div>
-
-    <div class="arc__bar">
-      <button class="arc__nav" type="button" data-arc-go="-1" aria-label="حوزه‌ی قبل">‹</button>
-      <span class="arc__count"><b data-arc-now>۰۱</b> / <span data-arc-all></span></span>
-      <button class="arc__nav" type="button" data-arc-go="1" aria-label="حوزه‌ی بعد">›</button>
-    </div>
-
-    <button class="arc__all" type="button" data-arc-toggle
-            aria-expanded="false">نمایش همه‌ی حوزه‌ها</button>
-
-    <div class="fields" data-arc-list hidden>
-      {% for f in fields %}
-        <button class="fieldrow" type="button" data-i="{{ forloop.counter0 }}">
-          <span class="fieldrow__en">{{ f.en }}</span>
-          <span class="fieldrow__fa">{{ f.name_fa }}</span>
-        </button>
-      {% endfor %}
-      {% for f in fields_more %}
-        <span class="fieldrow">
-          <span class="fieldrow__en">{{ f.en }}</span>
-          <span class="fieldrow__fa">{{ f.name_fa }}</span>
-        </span>
-      {% endfor %}
+    <div class="strip__wrap" data-strip>
+      <div class="strip__row" data-strip-row>
+        {% for s in strip %}
+          <a class="strip__cell" href="{% url 'photo' s.pk %}" title="{{ s.label }}">
+            <img src="{{ s.src }}" alt="{{ s.label }}" loading="lazy" draggable="false">
+            <span class="strip__cap">{{ s.label }}</span>
+          </a>
+        {% endfor %}
+        {# نسخه‌ی دوم برای حلقه‌ی بی‌درز؛ از دید صفحه‌خوان پنهان است #}
+        {% for s in strip %}
+          <a class="strip__cell" href="{% url 'photo' s.pk %}" aria-hidden="true" tabindex="-1">
+            <img src="{{ s.src }}" alt="" loading="lazy" draggable="false">
+            <span class="strip__cap">{{ s.label }}</span>
+          </a>
+        {% endfor %}
+      </div>
     </div>
   </section>
+  {% endif %}
 
-  <!-- تخته‌ی کارها -->
-  <section class="band" id="works">
-    <p class="lab">کارها</p>
+  <!-- ===== تازه‌ترین قاب‌ها ===== -->
+  {% if latest %}
+  <section class="band reveal" id="works">
+    <div class="rowhead">
+      <p class="lab">تازه‌ترین‌ها</p>
+      <a class="rowhead__all" href="{% url 'gallery' %}">همه‌ی فعالیت‌ها <i aria-hidden="true">&larr;</i></a>
+    </div>
+
     <div class="board">
-      {% for w in works %}
-        <button class="work reveal" data-name="{{ w.title }}"
-                data-shots='[{% for s in w.shots.all %}"{{ s.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+      {% for s in latest %}
+        <a class="work" href="{% url 'photo' s.pk %}">
           <span class="work__frame">
-            {% if w.cover %}<img class="work__img" src="{{ w.cover.url }}" alt="{{ w.title }}">{% endif %}
+            <img class="work__img" src="{{ s.src }}" alt="{{ s.label }}" loading="lazy">
           </span>
           <span class="work__cap">
-            <span class="work__name">{{ w.title }}</span>
-            <span class="work__meta">{{ w.meta }}</span>
-            <span class="work__more">دیدن قاب‌ها</span>
+            <span class="work__name">{{ s.label }}</span>
+            <span class="work__meta">{% if s.field %}{{ s.field.name_fa }}{% endif %}{% if s.brand %} · {{ s.brand }}{% endif %}</span>
           </span>
-        </button>
+        </a>
       {% endfor %}
     </div>
   </section>
+  {% endif %}
 
   <!-- عکس تمام‌عرض -->
   {% if feature_a %}
-  <figure class="full">
-    <span class="full__in"><img data-par="52" src="{{ feature_a.image.url }}" alt="{{ feature_a.caption }}"></span>
-    <figcaption><span>{{ feature_a.caption }}</span><span>{{ feature_a.meta }}</span></figcaption>
-  </figure>
+  <a class="full" href="{{ feature_a.href }}">
+    <span class="full__in"><img data-par="52" src="{{ feature_a.image.url }}" alt="{{ feature_a.caption }}" loading="lazy"></span>
+    <span class="full__cap"><span>{{ feature_a.caption }}</span><span>{{ feature_a.meta }}</span></span>
+  </a>
   {% endif %}
 
   <!-- لاین افقی -->
+  {% if reel %}
   <section class="band band--flush reel reveal">
-    <p class="lab">قاب‌ها <span class="reel__hint">بکشید</span></p>
+    <p class="lab">ادیتوریال <span class="reel__hint">بکشید</span></p>
     <div class="reel__wrap">
       <div class="reel__track" data-reel>
         {% for r in reel %}
-          <figure class="reel__item">
-            <span class="reel__frame"><img src="{{ r.image.url }}" alt="{{ r.caption }}" draggable="false"></span>
-            <figcaption>{{ r.caption }}</figcaption>
-          </figure>
+          <a class="reel__item" href="{{ r.href }}">
+            <span class="reel__frame"><img src="{{ r.image.url }}" alt="{{ r.caption }}" loading="lazy" draggable="false"></span>
+            <span class="reel__cap">{{ r.caption }}</span>
+          </a>
         {% endfor %}
       </div>
     </div>
     <div class="reel__bar"><span class="reel__fill"></span></div>
   </section>
+  {% endif %}
 
-  <!-- بنر -->
-  <section class="banner reveal">
+  <!-- ===== بنر — رنگش از پنل مدیریت می‌آید ===== -->
+  <section class="banner reveal"
+           style="--bnr-1: {{ profile.banner_bg }}; --bnr-2: {{ profile.banner_bg2 }}; --bnr-ink: {{ profile.banner_ink }};">
     <span class="banner__word" aria-hidden="true">YEKTA</span>
     {% if profile.banner_cut %}
       <img class="banner__cut" src="{{ profile.banner_cut.url }}" alt="{{ profile.name_fa }}">
@@ -243,7 +270,7 @@
 
     <div class="banner__top">
       <span class="banner__tag">MODEL</span>
-      <a class="banner__cta" href="#book">شروع همکاری</a>
+      <a class="banner__cta" href="{% url 'collab' %}">شروع همکاری</a>
     </div>
     <div></div>
     <div class="banner__bot">
@@ -251,57 +278,62 @@
         <span class="banner__name">{{ profile.name_fa }}</span>
         <span class="banner__desc">{{ profile.tagline }}</span>
       </span>
-      <span class="banner__note">
-        {% if minis.0 %}
-          <img class="banner__thumb" src="{{ minis.0.image.url }}" alt="">
-        {% endif %}
-        تاریخ آزاد را از بخش همکاری بردارید
-      </span>
+      <a class="banner__note" href="{% url 'collab' %}">
+        {% if minis.0 %}<img class="banner__thumb" src="{{ minis.0.image.url }}" alt="" loading="lazy">{% endif %}
+        تاریخ آزاد را از صفحه‌ی همکاری بردارید
+      </a>
     </div>
   </section>
 
   <!-- دو عکس تمام‌عرض -->
+  {% if duo %}
   <div class="duo">
     {% for d in duo %}
-      <figure>
-        <span class="duo__frame"><img data-par="30" src="{{ d.image.url }}" alt="{{ d.caption }}"></span>
-        <figcaption>{{ d.caption }}</figcaption>
-      </figure>
+      <a href="{{ d.href }}">
+        <span class="duo__frame"><img data-par="30" src="{{ d.image.url }}" alt="{{ d.caption }}" loading="lazy"></span>
+        <span class="duo__cap">{{ d.caption }}</span>
+      </a>
     {% endfor %}
   </div>
+  {% endif %}
 
   <!-- ادیتوریال -->
+  {% if plate %}
   <section class="band band--bone reveal">
-    <p class="lab">ادیتوریال</p>
-
-    {% if plate %}
-    <figure class="plate">
-      <span class="plate__in"><img data-par="34" src="{{ plate.image.url }}" alt="{{ plate.caption }}"></span>
-      <figcaption class="plate__cap"><span>{{ plate.caption }}</span><span>{{ plate.meta }}</span></figcaption>
-    </figure>
-    {% endif %}
+    <p class="lab">قاب برگزیده</p>
+    <a class="plate" href="{{ plate.href }}">
+      <span class="plate__in"><img data-par="34" src="{{ plate.image.url }}" alt="{{ plate.caption }}" loading="lazy"></span>
+      <span class="plate__cap"><span>{{ plate.caption }}</span><span>{{ plate.meta }}</span></span>
+    </a>
   </section>
+  {% endif %}
 
-  <section class="band band--bone covers reveal" style="padding-top:0">
-    {% for c in covers %}
-      <figure class="cover">
-        <span class="cover__frame"><img src="{{ c.image.url }}" alt="{{ c.caption }}"></span>
-        <figcaption>
-          <span class="cover__name">{{ c.caption }}</span>
-          <span class="cover__pub">{{ c.meta }}</span>
-        </figcaption>
-      </figure>
-    {% endfor %}
+  {% if editorial %}
+  <section class="band band--bone reveal" style="padding-top:0">
+    <div class="wall__grid">
+      {% for c in editorial %}
+        <a class="ed" href="{{ c.href }}">
+          <span class="ed__frame"><img src="{{ c.src }}" alt="{{ c.caption }}" loading="lazy" decoding="async"></span>
+          {% if c.caption %}
+          <span class="ed__cap">
+            <span class="ed__name">{{ c.caption }}</span>
+            {% if c.meta %}<span class="ed__pub">{{ c.meta }}</span>{% endif %}
+          </span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
   </section>
+  {% endif %}
 
-  <a class="arch" href="#works"><span>دیدن همه‌ی کارها</span><span class="arch__plus">+</span></a>
+  <a class="arch" href="{% url 'gallery' %}"><span>دیدن همه‌ی فعالیت‌ها</span><span class="arch__plus">+</span></a>
 
   <!-- عکس تمام‌عرض -->
   {% if feature_b %}
-  <figure class="full">
-    <span class="full__in"><img data-par="52" src="{{ feature_b.image.url }}" alt="{{ feature_b.caption }}"></span>
-    <figcaption><span>{{ feature_b.caption }}</span><span>{{ feature_b.meta }}</span></figcaption>
-  </figure>
+  <a class="full" href="{{ feature_b.href }}">
+    <span class="full__in"><img data-par="52" src="{{ feature_b.image.url }}" alt="{{ feature_b.caption }}" loading="lazy"></span>
+    <span class="full__cap"><span>{{ feature_b.caption }}</span><span>{{ feature_b.meta }}</span></span>
+  </a>
   {% endif %}
 
   <div class="band--bone marq" aria-hidden="true">
@@ -319,71 +351,64 @@
     </dl>
   </section>
 
-  <!-- تقویم -->
-  <section class="band band--jade reveal" id="book">
-    <p class="lab">همکاری</p>
+  <!-- ===== دکمه‌ی بزرگ همکاری — به‌جای تقویمِ درون‌صفحه‌ای ===== -->
+  <!-- تقویم حالا صفحه‌ی خودش را دارد؛ اینجا فقط دعوت می‌کنیم، با یک بنر
+       زنده که با اسکرول نفس می‌کشد و چشم را نگه می‌دارد. -->
+  <section class="pitch reveal" id="book">
+    <a class="pitch__box" href="{% url 'collab' %}" data-pitch>
+      <span class="pitch__grid" aria-hidden="true"></span>
 
-    <div class="cal" data-end="{{ day_end }}" data-max="{{ max_hours }}">
-      <div class="cal__tabs">
-        <button class="cal__tab is-on" data-tab="week">این هفته</button>
-        <button class="cal__tab" data-tab="month">این ماه</button>
-      </div>
+      <span class="pitch__lab">همکاری با یکتا</span>
 
-      <div class="cal__main">
-        <div>
-          <div class="cal__pane" data-pane="week">
-            <div class="week">
-              {% for d in week %}
-                <div class="wday {% if d.free %}wday--free{% else %}wday--busy{% endif %}"
-                     data-day="{{ d.name }}">
-                  <span class="wday__n">{{ d.name }}</span>
-                  <span class="wday__s">{% if d.free %}آزاد{% else %}رزرو شده{% endif %}</span>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
+      <span class="pitch__title">
+        <b>تاریخ آزاد</b> را ببین،
+        <b>ساعت</b> را بردار،
+        <b>درخواست</b> بفرست.
+      </span>
 
-          <div class="cal__pane" data-pane="month" hidden>
-            <div class="cal__head">
-              <button class="cal__arrow" data-go="prev" aria-label="ماه قبل">‹</button>
-              <span class="cal__month"></span>
-              <button class="cal__arrow" data-go="next" aria-label="ماه بعد">›</button>
-            </div>
-            <div class="cal__grid"></div>
-          </div>
-        </div>
+      <span class="pitch__row">
+        {% if book.is_open %}
+          <span class="pitch__chip pitch__chip--live">پذیرش باز است</span>
+        {% else %}
+          <span class="pitch__chip">{{ book.closed_note|default:"پذیرش فعلاً بسته است" }}</span>
+        {% endif %}
+        {% if book.floor_price %}
+          <span class="pitch__chip">از {{ book.floor_fa }} تومان</span>
+        {% endif %}
+        <span class="pitch__chip">پاسخ تا {{ book.request_ttl|fa }} ساعت</span>
+      </span>
 
-        <div class="cal__slots">
-          <h3>ساعت شروع</h3>
-          <div class="slots">
-            {% for t in times %}<button class="slot" data-h="{{ t.h }}">{{ t.fa }}</button>{% endfor %}
-          </div>
-        </div>
+      <span class="pitch__btn">
+        <span>رفتن به صفحه‌ی همکاری</span>
+        <i aria-hidden="true">&larr;</i>
+      </span>
 
-        <div class="cal__dur" hidden>
-          <h3>تا ساعت</h3>
-          <div class="durs"></div>
-        </div>
-      </div>
-
-      <div class="cal__foot">
-        <span class="cal__sum"></span>
-        <button class="cal__go" disabled>ادامه</button>
-      </div>
-    </div>
-
-    <p class="book__note">
-      روزهای نشان‌دار آزادند. برای ثبت نهایی باید حساب کارفرما بسازید؛
-      هر درخواست تا یک روز اعتبار دارد.
-    </p>
+      <!-- آفتابگردانِ بزرگِ گوشه — امضای همیشگی صفحه -->
+      <svg class="pitch__sun" viewBox="0 0 120 120" aria-hidden="true">
+        <g class="pitch__petals">
+          <ellipse cx="60" cy="26" rx="9" ry="26"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(30 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(60 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(90 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(120 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(150 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(180 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(210 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(240 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(270 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(300 60 60)"/>
+          <ellipse cx="60" cy="26" rx="9" ry="26" transform="rotate(330 60 60)"/>
+        </g>
+        <circle class="pitch__core" cx="60" cy="60" r="21"/>
+      </svg>
+    </a>
   </section>
 
-  {{ months|json_script:"cal-data" }}
-
   <!-- برندها -->
+  {% if brands %}
   <section class="band reveal">
     <p class="lab">همکاری با</p>
-    <div class="brand-grid">
+    <div class="brand-grid hairgrid">
       {% for b in brands %}
         <div class="brand-tile">
           <span class="brand-tile__mark">
@@ -395,28 +420,11 @@
           </span>
           <span class="brand-tile__name">{{ b.name }}</span>
         </div>
-      {% empty %}
-        <p class="brand-grid__empty">به‌زودی</p>
       {% endfor %}
     </div>
   </section>
+  {% endif %}
 
-  <!-- دعوت -->
-  <section class="band join reveal" id="join" style="padding-top:0">
-    <h2 class="join__title">برای رزرو تاریخ، حساب کارفرما بسازید.</h2>
-    <a class="join__btn" href="{% url 'signup' %}">ثبت‌نام کارفرما</a>
-    <p class="join__soon">ثبت‌نام مدل و عکاس به‌زودی اضافه می‌شود.</p>
-  </section>
-
-</div>
-
-<div class="box">
-  <div class="box__head">
-    <span class="box__name"></span>
-    <button class="box__close">بستن</button>
-  </div>
-  <div class="box__track"></div>
-  <div class="box__rail"><span class="box__fill"></span></div>
 </div>
 
 {% endblock %}

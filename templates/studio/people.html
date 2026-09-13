@@ -1,0 +1,100 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}کارفرماها{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <h1 class="sth">کارفرماها</h1>
+  <p class="stp">هرکسی که ثبت‌نام کرده یا خودت دستی اضافه‌اش کرده‌ای، با همه‌ی اطلاعاتش.</p>
+</section>
+
+<!-- ═══════ افزودن دستی ═══════ -->
+<section class="card">
+  <div class="card__head"><h2>افزودن کارفرما</h2></div>
+  <p class="stp">
+    برای کسی که از دایرکت یا تلفن پیام داده و حساب ندارد. حساب بدون رمز ساخته
+    می‌شود؛ هر وقت خواست، با «فراموشی رمز» روی همان ایمیل فعالش می‌کند.
+  </p>
+
+  <form method="post" class="upl">
+    {% csrf_token %}
+
+    <div class="upl__grid">
+      <label class="fl">{{ form.company }}<span>نام برند</span></label>
+      <label class="fl">{{ form.contact_name }}<span>نام رابط</span></label>
+      <label class="fl">{{ form.phone }}<span>شماره تماس</span></label>
+      <label class="fl">{{ form.email }}<span>ایمیل (اختیاری)</span></label>
+      <label class="fl fl--sel">{{ form.activity }}<span>حیطه</span></label>
+      <label class="fl">{{ form.city }}<span>شهر</span></label>
+      <label class="fl">{{ form.instagram }}<span>اینستاگرام</span></label>
+    </div>
+
+    <label class="fl">{{ form.note }}<span>یادداشت خصوصی — فقط خودت می‌بینی</span></label>
+
+    <button type="submit" class="btn btn--send">افزودن <i>&larr;</i></button>
+  </form>
+</section>
+
+<!-- ═══════ فهرست ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>همه‌ی کارفرماها</h2>
+    <span>{{ employers|length|fa }} مورد</span>
+  </div>
+
+  <ul class="rows">
+    {% for e in employers %}
+      <li class="row {% if e.is_blocked %}is-off{% endif %}">
+        <span class="row__pic row__pic--mono">{{ e.company|first }}</span>
+        <span class="row__txt">
+          <b>{{ e.company }}</b>
+          <span>
+            {{ e.contact_name }} · <a href="tel:{{ e.phone }}" dir="ltr">{{ e.phone }}</a>
+            · {{ e.n|fa }} درخواست
+            {% if e.added_by_model %} · دستی{% endif %}
+            {% if e.is_trusted %} · مورد اعتماد{% endif %}
+          </span>
+        </span>
+        <span class="row__acts">
+          {% if e.instagram %}
+            <a href="https://instagram.com/{{ e.instagram }}" target="_blank" rel="noopener">پیج</a>
+          {% endif %}
+          <a href="/admin/main/employer/{{ e.pk }}/change/" target="_blank" rel="noopener">ویرایش</a>
+        </span>
+      </li>
+    {% empty %}
+      <li class="card__empty">هنوز کارفرمایی ثبت نشده.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<!-- ═══════ پشتیبانی ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>پیام‌های پشتیبانی</h2>
+    <span>{{ tickets|length|fa }} مورد</span>
+  </div>
+
+  <ul class="rows">
+    {% for t in tickets %}
+      <li class="row {% if t.is_done %}is-off{% endif %}">
+        <span class="row__txt">
+          <b dir="ltr">{{ t.phone }}{% if t.name %} — {{ t.name }}{% endif %}</b>
+          <span>{{ t.body }}</span>
+          <span class="row__time">{{ t.created|jdate }} — {{ t.created|time:"H:i"|fa }}</span>
+        </span>
+        <form class="row__acts" method="post" action="{% url 'studio_ticket_done' t.pk %}">
+          {% csrf_token %}
+          <a href="tel:{{ t.phone }}">تماس</a>
+          <button type="submit">{% if t.is_done %}برگردان{% else %}رسیدگی شد{% endif %}</button>
+        </form>
+      </li>
+    {% empty %}
+      <li class="card__empty">پیامی نرسیده.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endblock %}

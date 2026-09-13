@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}پشتیبانی — YEKTA{% endblock %}
+{% block desc %}شماره‌ات را بگذار و بنویس چه لازم داری؛ همان شماره تماس گرفته می‌شود.{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/collab.css' %}">{% endblock %}
+{% block body_class %}has-top co{% endblock %}
+
+{% block content %}
+
+<header class="cohead">
+  <div class="cohead__in">
+    <p class="crumb"><a href="{% url 'home' %}">خانه</a><span>›</span>پشتیبانی</p>
+
+    <h1 class="cohead__title">سوالی داری؟</h1>
+    <p class="cohead__note">
+      لازم نیست حساب بسازی. شماره‌ات را بگذار و بنویس چه چیزی می‌خواهی —
+      پیامت مستقیم روی میز یکتا می‌نشیند و با همین شماره جواب می‌گیری.
+    </p>
+
+    <div class="cohead__chips">
+      <span class="cochip cochip--live">بدون نیاز به ثبت‌نام</span>
+      {% if profile.phone %}<span class="cochip" dir="ltr">{{ profile.phone }}</span>{% endif %}
+      {% if profile.instagram %}
+        <a class="cochip" href="{{ profile.instagram }}" rel="noopener" target="_blank">اینستاگرام</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<div class="cowrap">
+
+  <form class="wz" method="post" novalidate>
+    {% csrf_token %}
+
+    <h2 class="wz__h">پیام به یکتا</h2>
+
+    {% if form.non_field_errors %}
+      <p class="wz__alert">{{ form.non_field_errors.0 }}</p>
+    {% endif %}
+
+    <div style="display:grid; gap:1rem;">
+      {% for f in form %}
+        {% if f.name != 'website' %}
+          <label class="fl">
+            {{ f }}<span>{{ f.label }}</span>
+            {% if f.errors %}<span class="fl__bad">{{ f.errors.0 }}</span>{% endif %}
+          </label>
+        {% endif %}
+      {% endfor %}
+
+      {# تله‌ی ربات: از دید کاربر پنهان است، ولی ربات‌ها پرش می‌کنند #}
+      <div class="sr-trap" aria-hidden="true">
+        {{ form.website }}
+      </div>
+    </div>
+
+    <div class="wz__nav">
+      <span class="wz__spacer"></span>
+      <button type="submit" class="btn btn--send">فرستادن پیام <i>&larr;</i></button>
+    </div>
+  </form>
+
+  <aside class="sum">
+    <h2 class="sum__h">چه چیزی اینجا بپرسم؟</h2>
+
+    <ul class="sup__list">
+      <li>هزینه‌ی یک آفیش برای کار من چقدر می‌شود؟</li>
+      <li>برای فلان تاریخ، یکتا آزاد است؟</li>
+      <li>حسابم مشکل دارد یا رمزم را فراموش کرده‌ام.</li>
+      <li>می‌خواهم قرارداد بلندمدت ببندم.</li>
+    </ul>
+
+    <p class="sum__fine">
+      برای ثبت رسمیِ یک آفیش، به‌جای این فرم از
+      <a href="{% url 'collab' %}">صفحه‌ی همکاری</a> استفاده کن — آنجا تاریخ و
+      ساعت واقعاً برایت نگه داشته می‌شود.
+    </p>
+  </aside>
+
+</div>
+
+{% endblock %}

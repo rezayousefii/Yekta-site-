@@ -1,0 +1,116 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}عکس‌ها{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <h1 class="sth">عکس‌ها</h1>
+  <p class="stp">عکس تازه بگذار، قدیمی را بردار، و مشخص کن هرکدام مال کدام مجموعه است.</p>
+</section>
+
+<!-- ═══════ افزودن ═══════ -->
+<!-- روی گوشی، دکمه‌ی «انتخاب عکس» مستقیم دوربین یا گالری آیفون را باز می‌کند. -->
+<section class="card">
+  <div class="card__head"><h2>عکس تازه</h2></div>
+
+  <form class="upl" method="post" enctype="multipart/form-data" data-upload>
+    {% csrf_token %}
+
+    <label class="drop" data-drop>
+      {{ form.image }}
+      <span class="drop__eye" data-drop-eye>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <circle cx="8.5" cy="10" r="1.8"/>
+          <path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/>
+        </svg>
+      </span>
+      <span class="drop__txt">
+        <b>انتخاب عکس</b>
+        <span data-drop-name>از گالری یا دوربین</span>
+      </span>
+    </label>
+
+    <div class="upl__grid">
+      <label class="fl"> {{ form.title }}<span>عنوان</span></label>
+      <label class="fl">{{ form.brand }}<span>برند / کارفرما</span></label>
+      <label class="fl fl--sel">{{ form.field }}<span>مجموعه</span></label>
+      <label class="fl fl--sel">{{ form.model_type }}<span>نوع مدلینگ</span></label>
+      <label class="fl fl--sel">{{ form.place }}<span>محل</span></label>
+      <label class="fl">{{ form.photographer }}<span>عکاس</span></label>
+      <label class="fl">{{ form.year }}<span>سال</span></label>
+    </div>
+
+    <label class="fl">{{ form.story }}<span>توضیح پروژه — زیر عکس دیده می‌شود</span></label>
+
+    <div class="upl__flags">
+      <label class="flag">{{ form.on_strip }}<span>در نوار متحرک صفحه‌ی اول</span></label>
+      <label class="flag">{{ form.is_published }}<span>منتشر شود</span></label>
+    </div>
+
+    <button type="submit" class="btn btn--send">افزودن عکس <i>&larr;</i></button>
+  </form>
+</section>
+
+<!-- ═══════ فهرست ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>همه‌ی عکس‌ها</h2>
+    <span>{{ photos.paginator.count|fa }} قاب</span>
+  </div>
+
+  <div class="filt__row">
+    <a class="chipf {% if not pick %}is-on{% endif %}" href="{% url 'studio_photos' %}">همه</a>
+    {% for f in fields %}
+      <a class="chipf {% if pick == f.slug %}is-on{% endif %}"
+         href="?field={{ f.slug }}">{{ f.name_fa }}</a>
+    {% endfor %}
+  </div>
+
+  {% if photos %}
+    <div class="shelf">
+      {% for p in photos %}
+        <article class="tile {% if not p.is_published %}is-off{% endif %}">
+          <a class="tile__pic" href="{% url 'photo' p.pk %}" target="_blank" rel="noopener">
+            {% if p.src %}<img src="{{ p.src }}" alt="{{ p.label }}" loading="lazy">{% endif %}
+            {% if p.on_strip %}<span class="tile__flag">نوار</span>{% endif %}
+          </a>
+
+          <div class="tile__body">
+            <b>{{ p.label }}</b>
+            <span>{% if p.field %}{{ p.field.name_fa }}{% else %}بدون مجموعه{% endif %} · {{ p.clicks|fa }} کلیک</span>
+          </div>
+
+          <form class="tile__acts" method="post" action="{% url 'studio_photo_action' p.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="back" value="{{ request.get_full_path }}">
+            <button type="submit" name="do" value="toggle" title="نمایش / پنهان">
+              {% if p.is_published %}پنهان{% else %}نمایش{% endif %}
+            </button>
+            <button type="submit" name="do" value="strip" title="نوار متحرک">نوار</button>
+            <button type="submit" name="do" value="delete" class="is-bad"
+                    data-confirm="این عکس برای همیشه پاک شود؟">حذف</button>
+          </form>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if photos.has_other_pages %}
+      <div class="pager">
+        {% if photos.has_previous %}
+          <a href="?{% if pick %}field={{ pick }}&amp;{% endif %}page={{ photos.previous_page_number }}">تازه‌تر</a>
+        {% endif %}
+        <span>صفحه {{ photos.number|fa }} از {{ photos.paginator.num_pages|fa }}</span>
+        {% if photos.has_next %}
+          <a href="?{% if pick %}field={{ pick }}&amp;{% endif %}page={{ photos.next_page_number }}">قدیمی‌تر</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p class="card__empty">هنوز عکسی اینجا نیست.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

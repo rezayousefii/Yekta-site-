@@ -1,19 +1,24 @@
 """
 دیتابیس سایت یکتا.
 
-چهار دسته مدل:
-  ۱) محتوای سایت      — پروفایل، حوزه‌ها، کارها، ویترین، برندها
+شش دسته مدل:
+  ۱) محتوای سایت      — پروفایل، حوزه‌ها، نوع مدلینگ، محل، عکس‌ها، برندها
   ۲) تقویم و دسترسی   — الگوی هفتگی، استثنای روز، قفل بازه‌ای، ساعت‌ها، تنظیمات رزرو
-  ۳) حساب کارفرما     — Account (کاربر سفارشی با ایمیل) و Employer
-  ۴) درخواست و گفتگو  — CollabRequest، Message، AuditLog
+  ۳) حساب‌ها          — Account (کاربر سفارشی) و Employer
+  ۴) درخواست و گفتگو  — CollabRequest، Message
+  ۵) آمار             — بازدید روزانه، کلیک عکس، گزارش شبانه
+  ۶) پشتیبانی و ثبت   — SupportTicket، AuditLog
 """
 
-from datetime import timedelta
+import re
+from datetime import date as _date, timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.db.models import F
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 # ══════════════════════════════════════════════════════════
@@ -26,6 +31,7 @@ WEEKDAYS = [
 ]
 
 DIGITS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
+LATIN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
 
 
 def fa(value):
@@ -33,9 +39,25 @@ def fa(value):
     return str(value).translate(DIGITS)
 
 
+def money(value):
+    """۲۵۰۰۰۰۰ → «۲٬۵۰۰٬۰۰۰»"""
+    if value in (None, ""):
+        return ""
+    return fa("{:,}".format(int(value))).replace(",", "٬")
+
+
 def clock(hour):
     """۹ → «۰۹:۰۰»"""
     return fa("%02d:00" % hour)
+
+
+def make_slug(text, fallback="item"):
+    """
+    اسلاگ امن برای آدرس. حروف فارسی را نگه می‌دارد (جنگو با allow_unicode
+    این کار را می‌کند) و اگر چیزی باقی نماند، به fallback برمی‌گردد.
+    """
+    out = slugify(text or "", allow_unicode=True)
+    return out or fallback
 
 
 class Singleton(models.Model):
@@ -55,6 +77,29 @@ class Singleton(models.Model):
     def load(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class Ordered(models.Model):
+    """پایه‌ی مشترک فهرست‌های کوتاهی که یکتا از پنل کم و زیاد می‌کند."""
+
+    name      = models.CharField("نام", max_length=60)
+    slug      = models.SlugField("نشانی", max_length=70, unique=True, blank=True,
+                                 allow_unicode=True)
+    note      = models.CharField("توضیح کوتاه", max_length=90, blank=True)
+    is_active = models.BooleanField("فعال", default=True)
+    order     = models.PositiveIntegerField("ترتیب", default=0)
+
+    class Meta:
+        abstract = True
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = make_slug(self.name, "t%s" % (self.pk or ""))
+        super().save(*args, **kwargs)
 
 
 # ══════════════════════════════════════════════════════════
@@ -81,11 +126,24 @@ class Profile(Singleton):
 
     instagram = models.URLField("اینستاگرام", blank=True)
     email     = models.EmailField("ایمیل تماس", blank=True)
+    phone     = models.CharField("شماره تماس عمومی", max_length=20, blank=True)
 
     hero_video  = models.FileField("ویدیوی هیرو", upload_to="hero/", blank=True)
     hero_poster = models.ImageField("پوستر ویدیو", upload_to="hero/", blank=True)
-    banner_cut  = models.ImageField("تصویر بنر (PNG بدون پس‌زمینه)",
-                                    upload_to="banner/", blank=True)
+
+    banner_cut  = models.ImageField(
+        "تصویر بنر (PNG بدون پس‌زمینه)", upload_to="banner/", blank=True,
+        help_text="بهترین اندازه: ۱۶۰۰×۲۴۰۰ پیکسل، PNG با پس‌زمینه‌ی شفاف، "
+                  "قدِ کامل، پاها روی لبه‌ی پایین کادر.")
+
+    banner_bg = models.CharField(
+        "رنگ پس‌زمینه‌ی بنر", max_length=9, default="#1E6B57",
+        help_text="رنگ اصلی پشت تصویر بنر — از انتخابگر رنگ همین‌جا عوضش کن.")
+    banner_bg2 = models.CharField(
+        "رنگ دوم بنر (گوشه‌ها)", max_length=9, default="#0E2B24",
+        help_text="پس‌زمینه یک محو ملایم بین این دو رنگ است.")
+    banner_ink = models.CharField(
+        "رنگ متن روی بنر", max_length=9, default="#FFFFFF")
 
     updated = models.DateTimeField("آخرین ویرایش", auto_now=True)
 
@@ -105,70 +163,170 @@ class Profile(Singleton):
 
 
 class Field(models.Model):
-    """حوزه‌ی کاری — کارت‌های اسلایدر کمانی."""
+    """
+    حوزه‌ی کاری = یک «مجموعه». هم روی اسلایدر صفحه‌ی اول می‌نشیند و هم
+    صفحه‌ی گالری خودش را دارد: /gallery/<slug>/
+    """
 
     FIT = [("cover", "پر کردن قاب"), ("contain", "جا شدن کامل (PNG بدون پس‌زمینه)")]
 
     en      = models.CharField("نام لاتین", max_length=40)
     name_fa = models.CharField("نام فارسی", max_length=40)
-    note  = models.CharField("توضیح کوتاه", max_length=60, blank=True)
-    image = models.ImageField("تصویر", upload_to="fields/", blank=True)
+    slug    = models.SlugField("نشانی صفحه", max_length=60, unique=True, blank=True,
+                               allow_unicode=True)
+    note    = models.CharField("توضیح کوتاه", max_length=60, blank=True)
+    blurb   = models.TextField("معرفی صفحه‌ی مجموعه", blank=True)
+
+    image = models.ImageField("تصویر ثابت (اختیاری)", upload_to="fields/", blank=True,
+                              help_text="اگر خالی بماند، تازه‌ترین عکسِ همین مجموعه "
+                                        "خودکار تصویر سردر می‌شود.")
     fit   = models.CharField("نحوه‌ی نمایش تصویر", max_length=10, choices=FIT, default="cover")
 
-    on_arc    = models.BooleanField("روی اسلایدر کمانی نمایش داده شود", default=True)
+    on_arc    = models.BooleanField("روی اسلایدر صفحه‌ی اول", default=True)
     is_active = models.BooleanField("فعال", default=True)
     order     = models.PositiveIntegerField("ترتیب", default=0)
 
     class Meta:
-        verbose_name = "حوزه‌ی کاری"
-        verbose_name_plural = "حوزه‌های کاری"
+        verbose_name = "حوزه / مجموعه"
+        verbose_name_plural = "حوزه‌ها و مجموعه‌ها"
         ordering = ["order", "id"]
 
     def __str__(self):
         return "%s — %s" % (self.name_fa, self.en)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = make_slug(self.en or self.name_fa, "field")
+        super().save(*args, **kwargs)
 
-class Work(models.Model):
-    """یک پروژه در تخته‌ی کارها؛ با کلیک، قاب‌هایش در لایت‌باکس باز می‌شود."""
+    @property
+    def cover_photo(self):
+        """تازه‌ترین عکس منتشرشده‌ی این مجموعه."""
+        return self.photos.filter(is_published=True).order_by("-created", "-id").first()
 
-    title = models.CharField("عنوان", max_length=80)
-    meta  = models.CharField("زیرعنوان", max_length=120, blank=True)
-    field = models.ForeignKey(Field, verbose_name="حوزه", on_delete=models.SET_NULL,
-                              null=True, blank=True, related_name="works")
-    cover = models.ImageField("کاور", upload_to="works/", blank=True)
+    @property
+    def cover_url(self):
+        """
+        تصویر سردر: اگر تصویر ثابت گذاشته شده همان، وگرنه تازه‌ترین عکس مجموعه.
+        یعنی هر عکس تازه‌ای که در این دسته گذاشته شود، خودکار سردر می‌شود.
+        """
+        if self.image:
+            return self.image.url
+        shot = self.cover_photo
+        return shot.image.url if shot else ""
+
+    @property
+    def photo_count(self):
+        return self.photos.filter(is_published=True).count()
+
+
+class ModelType(Ordered):
+    """نوع مدلینگ — لباس، عروس، فشن… فیلتر بالای صفحه‌ی فعالیت‌ها."""
+
+    class Meta(Ordered.Meta):
+        verbose_name = "نوع مدلینگ"
+        verbose_name_plural = "نوع‌های مدلینگ"
+
+
+class Place(Ordered):
+    """محل کار — استودیو، خیابانی، فضای باز… فیلتر بالای صفحه‌ی فعالیت‌ها."""
+
+    class Meta(Ordered.Meta):
+        verbose_name = "محل"
+        verbose_name_plural = "محل‌ها"
+
+
+class CollabKind(Ordered):
+    """نوع همکاری — قراردادی، روزانه، عکاسی، کت‌واک…"""
+
+    class Meta(Ordered.Meta):
+        verbose_name = "نوع همکاری"
+        verbose_name_plural = "نوع‌های همکاری"
+
+
+class Photo(models.Model):
+    """
+    هر عکس سایت. همه‌جا از همین می‌آید: اسلایدر، گالری مجموعه، نوار متحرک،
+    صفحه‌ی تک‌عکس. هر عکس دسته‌ی خودش را دارد، پس هر تصویر یک در ورودی است.
+    """
+
+    image = models.ImageField("تصویر", upload_to="photos/")
+    title = models.CharField("عنوان", max_length=90, blank=True)
+    story = models.TextField("توضیح پروژه", blank=True,
+                             help_text="همان متنی که زیر عکس، در صفحه‌ی تک‌عکس دیده می‌شود.")
+
+    field = models.ForeignKey(Field, verbose_name="مجموعه", on_delete=models.SET_NULL,
+                              null=True, blank=True, related_name="photos")
+    model_type = models.ForeignKey(ModelType, verbose_name="نوع مدلینگ",
+                                   on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="photos")
+    place = models.ForeignKey(Place, verbose_name="محل", on_delete=models.SET_NULL,
+                              null=True, blank=True, related_name="photos")
 
     year         = models.CharField("سال", max_length=10, blank=True)
     photographer = models.CharField("عکاس", max_length=80, blank=True)
+    brand        = models.CharField("برند / کارفرما", max_length=80, blank=True)
 
+    on_strip     = models.BooleanField("در نوار متحرک صفحه‌ی اول", default=False)
     is_published = models.BooleanField("منتشر شده", default=True)
     order        = models.PositiveIntegerField("ترتیب", default=0)
-    created      = models.DateTimeField("ایجاد", auto_now_add=True)
+
+    clicks  = models.PositiveIntegerField("تعداد کلیک", default=0, editable=False)
+    created = models.DateTimeField("افزوده شده", auto_now_add=True)
 
     class Meta:
-        verbose_name = "کار"
-        verbose_name_plural = "کارها"
-        ordering = ["order", "-created"]
+        verbose_name = "عکس"
+        verbose_name_plural = "عکس‌ها"
+        ordering = ["order", "-created", "-id"]
+        indexes = [
+            models.Index(fields=["is_published", "order"]),
+            models.Index(fields=["-clicks"]),
+        ]
 
     def __str__(self):
-        return self.title
+        return self.title or "عکس %s" % self.pk
+
+    @property
+    def label(self):
+        return self.title or (self.field.name_fa if self.field else "بی‌عنوان")
+
+    @property
+    def src(self):
+        """
+        نشانی تصویر، یا رشته‌ی خالی اگر فایلی نیست.
+
+        روی سرور ممکن است ردیف باشد ولی فایلش نه (پاک شدن دستی رسانه،
+        بازگردانی ناقص دیتابیس). خواندن مستقیم image.url در آن حالت خطا
+        می‌دهد و کل صفحه را می‌اندازد؛ این یکی فقط خالی برمی‌گرداند.
+        """
+        try:
+            return self.image.url if self.image else ""
+        except ValueError:
+            return ""
+
+    def note_click(self):
+        """
+        شمارنده را در خود دیتابیس بالا می‌برد (F expression)، نه در پایتون —
+        وگرنه دو کلیک هم‌زمان یکی از آن‌ها را می‌خورد.
+        """
+        Photo.objects.filter(pk=self.pk).update(clicks=F("clicks") + 1)
+        PhotoClick.objects.create(photo_id=self.pk)
 
 
-class WorkShot(models.Model):
-    """قاب‌های یک کار."""
+class PhotoClick(models.Model):
+    """
+    ردِ تک‌تک کلیک‌ها — تا گزارش شبانه بتواند بگوید «این هفته چه چیزی دیده شد»،
+    نه فقط «از اول تا حالا».
+    """
 
-    work    = models.ForeignKey(Work, verbose_name="کار", on_delete=models.CASCADE,
-                               related_name="shots")
-    image   = models.ImageField("تصویر", upload_to="works/shots/")
-    caption = models.CharField("توضیح", max_length=120, blank=True)
-    order   = models.PositiveIntegerField("ترتیب", default=0)
+    photo   = models.ForeignKey(Photo, verbose_name="عکس", on_delete=models.CASCADE,
+                                related_name="click_rows")
+    created = models.DateTimeField("زمان", auto_now_add=True, db_index=True)
 
     class Meta:
-        verbose_name = "قاب"
-        verbose_name_plural = "قاب‌ها"
-        ordering = ["order", "id"]
-
-    def __str__(self):
-        return "%s — %s" % (self.work.title, self.caption or self.pk)
+        verbose_name = "کلیک عکس"
+        verbose_name_plural = "کلیک‌های عکس"
+        ordering = ["-created"]
 
 
 class Showcase(models.Model):
@@ -191,6 +349,12 @@ class Showcase(models.Model):
     caption = models.CharField("عنوان", max_length=120, blank=True)
     meta    = models.CharField("زیرنویس", max_length=120, blank=True)
 
+    field = models.ForeignKey(Field, verbose_name="مجموعه‌ی مقصد", on_delete=models.SET_NULL,
+                              null=True, blank=True, related_name="showcases",
+                              help_text="با کلیک روی این تصویر، کاربر به صفحه‌ی این "
+                                        "مجموعه می‌رود. خالی نگذار — هیچ تصویری "
+                                        "نباید بی‌مقصد باشد.")
+
     is_active = models.BooleanField("فعال", default=True)
     order     = models.PositiveIntegerField("ترتیب", default=0)
 
@@ -202,6 +366,10 @@ class Showcase(models.Model):
     def __str__(self):
         return "%s — %s" % (self.get_spot_display(), self.caption or self.pk)
 
+    @property
+    def href(self):
+        return "/gallery/%s/" % self.field.slug if self.field else "/gallery/"
+
 
 class Brand(models.Model):
     """برندهایی که یکتا با آن‌ها کار کرده."""
@@ -211,6 +379,7 @@ class Brand(models.Model):
     logo      = models.ImageField(
         "لوگو یا تصویر", upload_to="brands/", blank=True,
         help_text="اختیاری — اگر خالی بماند، حرف اول نام به‌جایش نشان داده می‌شود.")
+    link      = models.URLField("لینک", blank=True)
     is_active = models.BooleanField("فعال", default=True)
     order     = models.PositiveIntegerField("ترتیب", default=0)
 
@@ -310,6 +479,13 @@ class BookingSettings(Singleton):
     request_ttl   = models.PositiveSmallIntegerField("اعتبار هر درخواست (ساعت)", default=24)
     closed_note   = models.CharField("پیام وقتی پذیرش بسته است", max_length=160, blank=True)
 
+    floor_price = models.PositiveIntegerField(
+        "کف بودجه‌ی هر آفیش (تومان)", default=0,
+        help_text="کارفرما نمی‌تواند عددی کمتر از این پیشنهاد بدهد. صفر یعنی بدون کف.")
+    price_note = models.CharField(
+        "توضیح زیر بودجه", max_length=200, blank=True,
+        default="هزینه‌ی هر آفیش بسته به نوع همکاری، مدت و محل متغیر است.")
+
     class Meta:
         verbose_name = "تنظیمات رزرو"
         verbose_name_plural = "تنظیمات رزرو"
@@ -317,11 +493,19 @@ class BookingSettings(Singleton):
     def __str__(self):
         return "تنظیمات رزرو"
 
+    @property
+    def floor_fa(self):
+        return money(self.floor_price)
+
 
 class Calendar:
     """
     تصمیم‌گیرِ باز/بسته بودن یک روز.
     ترتیب: قفل بازه‌ای ← استثنای روز ← الگوی هفتگی
+
+    توجه: is_free فقط قواعد تقویمیِ خودِ روز را می‌بیند و به BookingSettings
+    (min_notice / horizon_days / is_open) کاری ندارد. اعتبارسنجی کامل رزرو در
+    views.booking_window_error انجام می‌شود.
     """
 
     def __init__(self):
@@ -343,9 +527,19 @@ class Calendar:
         return self.rules.get(self.weekday_of(day), False)
 
     def taken_hours(self, day):
-        """ساعت‌هایی که با یک درخواست تاییدشده پر شده‌اند."""
+        """
+        ساعت‌های پرِ یک روز.
+
+        درخواست‌های «در انتظار پاسخِ هنوز منقضی‌نشده» هم پر حساب می‌شوند، نه فقط
+        تاییدشده‌ها: یک درخواست در انتظار عملاً همان بازه را نگه داشته. بدون این،
+        دو کارفرما می‌توانستند هم‌زمان یک ساعت را بگیرند و تداخل تازه موقع تایید
+        معلوم می‌شد.
+        """
         busy = set()
-        rows = CollabRequest.objects.filter(date=day, status=CollabRequest.APPROVED)
+        rows = CollabRequest.objects.filter(date=day).filter(
+            models.Q(status=CollabRequest.APPROVED) |
+            models.Q(status=CollabRequest.PENDING, expires__gt=timezone.now())
+        )
         for r in rows:
             for h in range(r.start_hour, r.start_hour + r.hours):
                 busy.add(h)
@@ -353,8 +547,29 @@ class Calendar:
 
 
 # ══════════════════════════════════════════════════════════
-#  ۳) حساب کارفرما
+#  ۳) حساب‌ها
 # ══════════════════════════════════════════════════════════
+
+def clean_phone(raw):
+    """
+    شماره را به شکل یکدست ۱۱ رقمی «۰۹…» برمی‌گرداند.
+    رقم فارسی/عربی، فاصله، خط تیره، ‎+98 و 0098 همه پذیرفته می‌شوند.
+    اگر شکل درست نبود، None برمی‌گردد.
+    """
+    if not raw:
+        return None
+    v = str(raw).translate(LATIN_DIGITS)
+    v = re.sub(r"[\s\-()]", "", v)
+    if v.startswith("+98"):
+        v = "0" + v[3:]
+    elif v.startswith("0098"):
+        v = "0" + v[4:]
+    elif v.startswith("98") and len(v) == 12:
+        v = "0" + v[2:]
+    elif v.startswith("9") and len(v) == 10:
+        v = "0" + v
+    return v if re.fullmatch(r"0\d{10}", v) else None
+
 
 class AccountManager(BaseUserManager):
 
@@ -372,22 +587,34 @@ class AccountManager(BaseUserManager):
         extra.setdefault("is_superuser", True)
         extra.setdefault("is_active", True)
         extra.setdefault("email_verified", True)
+        extra.setdefault("role", Account.OWNER)
         return self.create_user(email, password, **extra)
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
     """
-    کاربر سایت. ورود با ایمیل است، نه نام کاربری.
+    کاربر سایت. ورود با ایمیل یا شماره تلفن است، نه نام کاربری.
     رمز هرگز خام ذخیره نمی‌شود؛ جنگو آن را هش می‌کند.
     """
 
+    OWNER    = "owner"      # سازنده‌ی سایت — دسترسی کامل
+    MODEL    = "model"      # یکتا — پنل اختصاصی خودش
+    EMPLOYER = "employer"   # کارفرما
+
+    ROLES = [(OWNER, "مدیر سایت"), (MODEL, "یکتا (مدل)"), (EMPLOYER, "کارفرما")]
+
     email     = models.EmailField("ایمیل", unique=True)
+    phone     = models.CharField("شماره تلفن", max_length=11, unique=True,
+                                 null=True, blank=True)
     full_name = models.CharField("نام و نام خانوادگی", max_length=80, blank=True)
 
+    role = models.CharField("نقش", max_length=10, choices=ROLES, default=EMPLOYER)
+
     is_active = models.BooleanField("فعال", default=True)
-    is_staff  = models.BooleanField("دسترسی به پنل", default=False)
+    is_staff  = models.BooleanField("دسترسی به پنل جنگو", default=False)
 
     email_verified = models.BooleanField("ایمیل تایید شده", default=False)
+    phone_verified = models.BooleanField("شماره تایید شده", default=False)
 
     failed_logins = models.PositiveSmallIntegerField("تلاش‌های ناموفق", default=0)
     locked_until  = models.DateTimeField("قفل تا", null=True, blank=True)
@@ -406,11 +633,32 @@ class Account(AbstractBaseUser, PermissionsMixin):
         ordering = ["-date_joined"]
 
     def __str__(self):
-        return self.email
+        return self.full_name or self.email
+
+    def save(self, *args, **kwargs):
+        # رشته‌ی خالی در فیلد unique دومی را رد می‌کند؛ NULL این مشکل را ندارد
+        if not self.phone:
+            self.phone = None
+        super().save(*args, **kwargs)
 
     @property
     def is_locked(self):
         return bool(self.locked_until and self.locked_until > timezone.now())
+
+    @property
+    def is_model(self):
+        """یکتا یا خودِ مدیر سایت — هر دو به پنل استودیو راه دارند."""
+        return self.role in (self.MODEL, self.OWNER) or self.is_superuser
+
+    @property
+    def short_name(self):
+        """نامی که در نوار بالای سایت نشان داده می‌شود."""
+        if self.full_name:
+            return self.full_name.split()[0]
+        emp = getattr(self, "employer", None)
+        if emp and emp.company:
+            return emp.company
+        return self.email.split("@")[0]
 
     def note_failed_login(self, tries=5, minutes=15):
         self.failed_logins += 1
@@ -489,10 +737,13 @@ class Employer(models.Model):
     lat = models.FloatField("عرض جغرافیایی", null=True, blank=True)
     lng = models.FloatField("طول جغرافیایی", null=True, blank=True)
 
+    added_by_model = models.BooleanField("دستی توسط یکتا اضافه شده", default=False)
+
     is_trusted = models.BooleanField("کارفرمای مورد اعتماد", default=False)
     is_blocked = models.BooleanField("مسدود", default=False)
     note       = models.TextField("یادداشت داخلی یکتا", blank=True)
 
+    signup_ip = models.GenericIPAddressField("IP ثبت‌نام", null=True, blank=True)
     created = models.DateTimeField("ایجاد", auto_now_add=True)
     updated = models.DateTimeField("ویرایش", auto_now=True)
 
@@ -543,6 +794,13 @@ class CollabRequest(models.Model):
         (DONE,        "انجام شده"),
     ]
 
+    BUDGET_SET = "set"
+    BUDGET_ASK = "ask"
+    BUDGET_MODES = [
+        (BUDGET_SET, "عدد پیشنهادی دارم"),
+        (BUDGET_ASK, "در درخواست ذکر می‌کنم"),
+    ]
+
     employer = models.ForeignKey(Employer, verbose_name="کارفرما", on_delete=models.PROTECT,
                                 related_name="requests")
 
@@ -551,11 +809,27 @@ class CollabRequest(models.Model):
     start_hour = models.PositiveSmallIntegerField("ساعت شروع")
     hours      = models.PositiveSmallIntegerField("مدت (ساعت)", default=1)
 
-    field   = models.ForeignKey(Field, verbose_name="حوزه", on_delete=models.SET_NULL,
-                                null=True, blank=True, related_name="requests")
+    # آنچه کارفرما در ویزارد انتخاب می‌کند
+    field      = models.ForeignKey(Field, verbose_name="حوزه", on_delete=models.SET_NULL,
+                                   null=True, blank=True, related_name="requests")
+    model_type = models.ForeignKey(ModelType, verbose_name="نوع مدلینگ",
+                                   on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="requests")
+    place_ref  = models.ForeignKey(Place, verbose_name="محل", on_delete=models.SET_NULL,
+                                   null=True, blank=True, related_name="requests")
+    kind       = models.ForeignKey(CollabKind, verbose_name="نوع همکاری",
+                                   on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="requests")
+
+    budget_mode   = models.CharField("نحوه‌ی بودجه", max_length=5,
+                                     choices=BUDGET_MODES, default=BUDGET_SET)
+    budget_amount = models.PositiveIntegerField("بودجه‌ی پیشنهادی (تومان)",
+                                                null=True, blank=True)
+
     brief   = models.TextField("شرح کار", blank=True)
-    place   = models.CharField("محل کار", max_length=140, blank=True)
-    budget  = models.CharField("بودجه‌ی پیشنهادی", max_length=60, blank=True)
+    place   = models.CharField("نشانی دقیق محل", max_length=140, blank=True)
+    crew    = models.CharField("تیم و همراهان", max_length=140, blank=True)
+    budget  = models.CharField("بودجه (متن قدیمی)", max_length=60, blank=True)
 
     status = models.CharField("وضعیت", max_length=12, choices=STATUS, default=PENDING)
 
@@ -609,8 +883,20 @@ class CollabRequest(models.Model):
         return "%s تا %s" % (clock(self.start_hour), clock(self.end_hour))
 
     @property
+    def budget_text(self):
+        if self.budget_mode == self.BUDGET_ASK:
+            return "در گفتگو مشخص می‌شود"
+        if self.budget_amount:
+            return "%s تومان" % money(self.budget_amount)
+        return self.budget or "—"
+
+    @property
     def is_expired(self):
         return self.status == self.PENDING and self.expires and self.expires < timezone.now()
+
+    @property
+    def is_past(self):
+        return self.date < _date.today()
 
     def decide(self, status, reply="", actor=None):
         """تایید / رد / پیشنهاد جایگزین — همه با امکان پیام دلخواه."""
@@ -659,6 +945,100 @@ class Message(models.Model):
         return "%s — %s" % (self.get_sender_display(), self.body[:40])
 
 
+# ══════════════════════════════════════════════════════════
+#  ۵) آمار
+# ══════════════════════════════════════════════════════════
+
+class VisitDay(models.Model):
+    """
+    شمارش بازدید، روز به روز. میدل‌ور فقط یک عدد بالا می‌برد — نه IP نگه
+    می‌دارد نه کوکی ردیاب می‌گذارد؛ سبک و بدون دردسر حریم خصوصی.
+    """
+
+    day     = models.DateField("روز", unique=True)
+    hits    = models.PositiveIntegerField("بازدید صفحه", default=0)
+    guests  = models.PositiveIntegerField("بازدیدکننده‌ی تازه", default=0)
+
+    class Meta:
+        verbose_name = "بازدید روزانه"
+        verbose_name_plural = "بازدید روزانه"
+        ordering = ["-day"]
+
+    def __str__(self):
+        return "%s — %s بازدید" % (self.day, fa(self.hits))
+
+    @classmethod
+    def bump(cls, fresh=False):
+        today = timezone.localdate()
+        row, _ = cls.objects.get_or_create(day=today)
+        cls.objects.filter(pk=row.pk).update(
+            hits=F("hits") + 1,
+            guests=F("guests") + (1 if fresh else 0),
+        )
+
+
+class DailyReport(models.Model):
+    """
+    گزارش کاری هر شب. دستور `python manage.py nightly_report` آن را می‌سازد
+    (روی لیارا با cron هر شب ساعت ۲۳:۵۹).
+    """
+
+    day = models.DateField("روز", unique=True)
+
+    visits    = models.PositiveIntegerField("بازدید", default=0)
+    guests    = models.PositiveIntegerField("بازدیدکننده", default=0)
+    clicks    = models.PositiveIntegerField("کلیک روی عکس‌ها", default=0)
+    requests  = models.PositiveIntegerField("درخواست تازه", default=0)
+    signups   = models.PositiveIntegerField("ثبت‌نام تازه", default=0)
+    tickets   = models.PositiveIntegerField("پیام پشتیبانی", default=0)
+
+    top = models.TextField("پرکلیک‌ترین عکس‌ها", blank=True,
+                           help_text="هر خط: شناسه | عنوان | تعداد کلیک")
+
+    created = models.DateTimeField("ساخته شده", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "گزارش شبانه"
+        verbose_name_plural = "گزارش‌های شبانه"
+        ordering = ["-day"]
+
+    def __str__(self):
+        return "گزارش %s" % self.day
+
+    @property
+    def top_rows(self):
+        out = []
+        for line in (self.top or "").splitlines():
+            bits = [b.strip() for b in line.split("|")]
+            if len(bits) == 3:
+                out.append({"pk": bits[0], "title": bits[1], "clicks": bits[2]})
+        return out
+
+
+# ══════════════════════════════════════════════════════════
+#  ۶) پشتیبانی و ثبت رویداد
+# ══════════════════════════════════════════════════════════
+
+class SupportTicket(models.Model):
+    """پیام پشتیبانی — فقط شماره و متن، بدون نیاز به حساب."""
+
+    name    = models.CharField("نام", max_length=60, blank=True)
+    phone   = models.CharField("شماره تماس", max_length=20)
+    body    = models.TextField("متن پیام")
+
+    is_done = models.BooleanField("رسیدگی شد", default=False)
+    ip      = models.GenericIPAddressField("IP", null=True, blank=True)
+    created = models.DateTimeField("زمان", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "پیام پشتیبانی"
+        verbose_name_plural = "پیام‌های پشتیبانی"
+        ordering = ["-created"]
+
+    def __str__(self):
+        return "%s — %s" % (self.phone, self.body[:40])
+
+
 class AuditLog(models.Model):
     """ردِ هر کاری که در پنل انجام می‌شود — برای این‌که چیزی گم نشود."""
 
@@ -677,3 +1057,15 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return "%s — %s" % (self.action, self.target)
+
+    @classmethod
+    def note(cls, request, action, target="", detail=""):
+        """میان‌بر ثبت رویداد از داخل ویوها."""
+        user = getattr(request, "user", None)
+        cls.objects.create(
+            actor=user if (user and user.is_authenticated) else None,
+            action=action[:60],
+            target=str(target)[:120],
+            detail=str(detail)[:2000],
+            ip=(request.META.get("REMOTE_ADDR") if request else None),
+        )

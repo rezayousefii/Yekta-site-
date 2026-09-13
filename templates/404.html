@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}این صفحه پیدا نشد — YEKTA{% endblock %}
+{% block body_class %}has-top{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/gallery.css' %}">{% endblock %}
+
+{% block content %}
+
+<section class="oops">
+  <!-- آفتابگردانی که سرش پایین افتاده — همان زبان بصری سایت، این‌بار غمگین -->
+  <svg class="oops__flower" viewBox="0 0 200 260" aria-hidden="true">
+    <path class="oops__stem" d="M100 255C100 200 96 150 92 108"/>
+    <path class="oops__leaf" d="M96 190c-26-14-50-9-64 8 22 13 47 11 64-8z"/>
+    <g class="oops__head" transform="translate(92 100) rotate(28)">
+      <g class="oops__petals">
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(0)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(45)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(90)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(135)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(225)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(270)"/>
+        <ellipse cx="0" cy="-38" rx="9" ry="24" transform="rotate(315)"/>
+      </g>
+      <circle cx="0" cy="0" r="19" fill="#5B3A16"/>
+      <circle cx="0" cy="0" r="12" fill="#3E2710"/>
+    </g>
+  </svg>
+
+  <p class="oops__num">۴۰۴</p>
+  <h1 class="oops__title">این صفحه پیدا نشد</h1>
+  <p class="oops__note">
+    شاید نشانی را اشتباه تایپ کرده‌ای، یا این قاب از سایت برداشته شده.
+    از این‌جا می‌توانی راهت را پیدا کنی.
+  </p>
+
+  <div class="oops__acts">
+    <a class="oops__go" href="{% url 'home' %}">صفحه‌ی اول</a>
+    <a class="oops__alt" href="{% url 'gallery' %}">فعالیت‌ها</a>
+    <a class="oops__alt" href="{% url 'collab' %}">همکاری</a>
+    <a class="oops__alt" href="{% url 'support' %}">پشتیبانی</a>
+  </div>
+</section>
+
+{% endblock %}

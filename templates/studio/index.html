@@ -1,0 +1,256 @@
+{% extends "studio/base.html" %}
+{% load static fa %}
+
+{% block title %}امروز{% endblock %}
+
+{% block content %}
+
+<!-- ═══════ نبض ═══════ -->
+<section class="pulse">
+  <div class="pulse__top">
+    <h1 class="sth">سلام {{ user.short_name }}</h1>
+    <p class="stp">این‌جا هرچیزی که امروز باید بدانی، در یک نگاه.</p>
+  </div>
+
+  <div class="figs hairgrid">
+    <div class="fig">
+      <b data-count="{{ nav_pending }}">۰</b>
+      <span>در انتظار پاسخ</span>
+    </div>
+    <div class="fig fig--ok">
+      <b data-count="{{ visits_week }}">۰</b>
+      <span>بازدید هفته</span>
+    </div>
+    <div class="fig">
+      <b data-count="{{ totals.photos }}">۰</b>
+      <span>قاب منتشرشده</span>
+    </div>
+    <div class="fig fig--live">
+      <b data-count="{{ nav_unread }}">۰</b>
+      <span>پیام نخوانده</span>
+    </div>
+  </div>
+</section>
+
+<div class="grid2">
+
+  <!-- ═══════ نمودار بازدید ═══════ -->
+  <section class="card">
+    <div class="card__head">
+      <h2>بازدید سایت</h2>
+      <span>۱۴ روز گذشته</span>
+    </div>
+
+    <!-- نمودار با SVG خالص ساخته می‌شود، بدون هیچ کتابخانه‌ای:
+         ستون‌ها ارتفاعشان را از درصدِ همان روز می‌گیرند. -->
+    <div class="chart" data-chart>
+      {% for c in chart %}
+        <div class="chart__col {% if c.today %}is-today{% endif %}"
+             style="--h: {{ c.pct }}%" data-tip="{{ c.label }} — {{ c.hits_fa }} بازدید">
+          <span class="chart__bar"></span>
+          <span class="chart__x">{{ c.label }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <p class="card__foot">
+      برای دیدن روند بلندمدت به <a href="{% url 'studio_reports' %}">گزارش‌ها</a> برو.
+    </p>
+  </section>
+
+  <!-- ═══════ آفیش بعدی ═══════ -->
+  <section class="card card--jade">
+    <div class="card__head">
+      <h2>آفیش بعدی</h2>
+      <span>تاییدشده</span>
+    </div>
+
+    {% if upcoming %}
+      {% with next=upcoming.0 %}
+        <div class="nextup" data-countdown="{{ next.date|date:'Y-m-d' }}T{{ next.start_hour|stringformat:'02d' }}:00:00">
+          <p class="nextup__who">{{ next.snap_company }}</p>
+          <p class="nextup__when">{{ next.date|jdate }} — {{ next.span }}</p>
+
+          <div class="nextup__clock">
+            <span><b data-cd-d>۰</b><i>روز</i></span>
+            <span><b data-cd-h>۰</b><i>ساعت</i></span>
+            <span><b data-cd-m>۰</b><i>دقیقه</i></span>
+          </div>
+
+          <a class="nextup__go" href="{% url 'studio_request' next.pk %}">دیدن جزئیات <i>&larr;</i></a>
+        </div>
+      {% endwith %}
+
+      {% if upcoming|length > 1 %}
+        <ul class="mini">
+          {% for r in upcoming|slice:"1:" %}
+            <li><a href="{% url 'studio_request' r.pk %}">
+              <span>{{ r.date|jdate }}</span><b>{{ r.snap_company }}</b>
+            </a></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% else %}
+      <p class="card__empty">هنوز آفیش تاییدشده‌ای در پیش نیست.</p>
+    {% endif %}
+  </section>
+
+</div>
+
+<!-- ═══════ درخواست‌های تازه ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>در انتظار پاسخ تو</h2>
+    <a href="{% url 'studio_requests' %}">همه</a>
+  </div>
+
+  {% if pending %}
+    <ul class="rq-list">
+      {% for r in pending %}
+        <li>
+          <a href="{% url 'studio_request' r.pk %}">
+            <span class="rq-list__co">{{ r.snap_company }}</span>
+            <span class="rq-list__when">{{ r.date|jdate }} · {{ r.span }}</span>
+            <span class="rq-list__b">{{ r.budget_text }}</span>
+            <i aria-hidden="true">&larr;</i>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="card__empty">همه‌چیز پاسخ داده شده. دستت درد نکند.</p>
+  {% endif %}
+</section>
+
+<div class="grid2">
+
+  <!-- ═══════ پرکلیک‌ترین قاب‌ها ═══════ -->
+  <section class="card">
+    <div class="card__head">
+      <h2>پرکلیک‌ترین قاب‌ها</h2>
+      <span>هفت روز گذشته</span>
+    </div>
+
+    {% if hot %}
+      <ul class="hot">
+        {% for p in hot %}
+          <li>
+            <a href="{% url 'photo' p.pk %}" target="_blank" rel="noopener">
+              <span class="hot__pic"><img src="{{ p.src }}" alt="" loading="lazy"></span>
+              <span class="hot__txt">
+                <b>{{ p.label }}</b>
+                <span class="hot__bar" style="--w: {{ p.pct }}%"></span>
+              </span>
+              <span class="hot__n">{{ p.recent|fa }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="card__empty">هنوز کلیکی ثبت نشده.</p>
+    {% endif %}
+  </section>
+
+  <!-- ═══════ ابزارهای سریع ═══════ -->
+  <section class="card">
+    <div class="card__head"><h2>کارهای سریع</h2></div>
+
+    <div class="quick">
+      <a class="qcard" href="{% url 'studio_photos' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <b>عکس تازه</b>
+        <span>از گالری گوشی، مستقیم روی سایت</span>
+      </a>
+
+      <a class="qcard" href="{% url 'studio_lists' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h9"/></svg>
+        <b>مجموعه تازه</b>
+        <span>حوزه، نوع مدلینگ یا محل اضافه کن</span>
+      </a>
+
+      <a class="qcard" href="{% url 'studio_people' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+        <b>کارفرمای دستی</b>
+        <span>کسی که از دایرکت پیام داده</span>
+      </a>
+
+      <!-- کلید پذیرش: یک فرم کوچک، نه جاوااسکریپت — پس همیشه کار می‌کند -->
+      <form class="qcard qcard--switch" method="post" action="{% url 'studio_toggle_open' %}">
+        {% csrf_token %}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="{% if booking_open %}17{% else %}7{% endif %}" cy="12" r="3.2"/></svg>
+        <b>پذیرش درخواست</b>
+        <span>{% if booking_open %}الان باز است{% else %}الان بسته است{% endif %}</span>
+        <button type="submit">{% if booking_open %}ببند{% else %}باز کن{% endif %}</button>
+      </form>
+    </div>
+  </section>
+
+</div>
+
+<div class="grid2">
+
+  <!-- ═══════ گزارش دیشب ═══════ -->
+  <section class="card">
+    <div class="card__head">
+      <h2>گزارش دیشب</h2>
+      <a href="{% url 'studio_reports' %}">همه</a>
+    </div>
+
+    {% if report %}
+      <div class="rep">
+        <div><b>{{ report.visits|fa }}</b><span>بازدید</span></div>
+        <div><b>{{ report.clicks|fa }}</b><span>کلیک</span></div>
+        <div><b>{{ report.requests|fa }}</b><span>درخواست</span></div>
+        <div><b>{{ report.signups|fa }}</b><span>ثبت‌نام</span></div>
+      </div>
+      <p class="card__foot">گزارش {{ report.day|jdate }}</p>
+    {% else %}
+      <p class="card__empty">
+        هنوز گزارشی ساخته نشده. هر شب خودکار ساخته می‌شود.
+      </p>
+    {% endif %}
+  </section>
+
+  <!-- ═══════ پیام‌های پشتیبانی ═══════ -->
+  <section class="card">
+    <div class="card__head">
+      <h2>پشتیبانی</h2>
+      <a href="{% url 'studio_people' %}">همه</a>
+    </div>
+
+    {% if tickets %}
+      <ul class="tick">
+        {% for t in tickets %}
+          <li>
+            <b dir="ltr">{{ t.phone }}</b>
+            <span>{{ t.body|truncatechars:70 }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="card__empty">پیام رسیدگی‌نشده‌ای نداری.</p>
+    {% endif %}
+  </section>
+
+</div>
+
+<!-- ═══════ لینک اشتراک ═══════ -->
+<section class="card share">
+  <div class="card__head"><h2>لینک سایت</h2></div>
+  <p class="stp">همین را در بیو اینستاگرام بگذار.</p>
+
+  <div class="share__row">
+    <input type="text" readonly dir="ltr" value="{{ request.scheme }}://{{ request.get_host }}/"
+           data-copy-src aria-label="نشانی سایت">
+    <button type="button" class="stbtn stbtn--pill" data-copy>کپی</button>
+  </div>
+
+  <div class="share__row">
+    <input type="text" readonly dir="ltr"
+           value="{{ request.scheme }}://{{ request.get_host }}{% url 'collab' %}"
+           data-copy-src aria-label="نشانی صفحه‌ی همکاری">
+    <button type="button" class="stbtn stbtn--pill" data-copy>کپی</button>
+  </div>
+</section>
+
+{% endblock %}

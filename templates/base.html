@@ -1,32 +1,60 @@
-{% load static %}
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#F4F1E9">
-  <title>{% block title %}YEKTA{% endblock %}</title>
+
+  <title>{% block title %}{{ site_profile.name_fa }} — مدل حرفه‌ای{% endblock %}</title>
+  <meta name="description" content="{% block desc %}{{ site_profile.tagline }}{% endblock %}">
+
+  <meta property="og:site_name" content="YEKTA">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}{{ site_profile.name_fa }}{% endblock %}">
+  <meta property="og:description" content="{% block og_desc %}{{ site_profile.tagline }}{% endblock %}">
+  {% block og_image %}{% endblock %}
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
-  <!-- اگر جاوااسکریپت اجرا نشود این کلاس اضافه نمی‌شود و بلوک‌های data-rise
-       به‌جای نامرئی‌ماندن، از همان اول دیده می‌شوند. -->
-  <script>document.documentElement.className += ' js';</script>
+  <!-- تم پیش از رنگ‌آمیزی صفحه اعمال می‌شود تا موقع لود «پرش سفید» نداشته باشیم.
+       همین خط کلاس js را هم می‌گذارد: اگر جاوااسکریپت اجرا نشود، بلوک‌های
+       data-rise به‌جای نامرئی‌ماندن از همان اول دیده می‌شوند. -->
+  <script>
+    (function(d){d.className+=' js';try{
+      var t=localStorage.getItem('yekta-theme');
+      if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))d.className+=' dark';
+    }catch(e){}})(document.documentElement);
+  </script>
   {% block css %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+
+  <a class="skip" href="#main">رفتن به محتوا</a>
 
   <div class="wave" aria-hidden="true"></div>
 
-  <header class="bar">
+  <header class="bar" data-bar>
     <a href="{% url 'home' %}" class="bar__mark">YEKTA</a>
-    <nav class="bar__nav">
-      <a href="{% url 'home' %}#works">کارها</a>
-      <a href="{% url 'home' %}#book">همکاری</a>
+
+    <nav class="bar__nav" aria-label="منوی اصلی">
+      <a href="{% url 'gallery' %}"{% if request.resolver_match.url_name in 'gallery,collection,photo' %} class="is-here"{% endif %}>فعالیت‌ها</a>
+      <a href="{% url 'support' %}" class="bar__thin">پشتیبانی</a>
+
       {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}">پیشخوان</a>
+        <a href="{% if user.is_model %}{% url 'studio' %}{% else %}{% url 'dashboard' %}{% endif %}" class="bar__me">
+          <span class="bar__dot" aria-hidden="true"></span>{{ user.short_name }}
+        </a>
       {% else %}
         <a href="{% url 'login' %}">ورود</a>
       {% endif %}
+
+      <a href="{% url 'collab' %}" class="bar__cta">
+        <span>همکاری</span>
+        <i aria-hidden="true"></i>
+      </a>
     </nav>
   </header>
 
@@ -51,21 +79,85 @@
     </svg>
   </button>
 
-  {% block content %}{% endblock %}
+  <main id="main">{% block content %}{% endblock %}</main>
 
   <footer class="foot">
 
-    <div class="foot__row">
-      <a href="{% url 'home' %}#works">کارها</a>
-      <a href="{% url 'home' %}#book">همکاری</a>
-      {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}">پیشخوان</a>
-        <a href="{% url 'logout' %}">خروج</a>
-      {% else %}
-        <a href="{% url 'login' %}">ورود کارفرما</a>
-      {% endif %}
-      <a href="#">اینستاگرام</a>
-      <button class="foot__lamp" data-lamp>روشن / خاموش</button>
+    {% block foot_cta %}
+    <!-- دعوت پایانی: آخرین چیزی که کاربر پیش از پایان صفحه می‌بیند -->
+    <section class="ask" data-rise>
+      <div class="ask__in">
+        <p class="ask__lab">همکاری</p>
+        <h2 class="ask__title">تاریخ آزادت را همین حالا بردار.</h2>
+        <p class="ask__note">
+          نوع همکاری، محل و بودجه را انتخاب می‌کنی، تاریخ را از تقویم برمی‌داری،
+          و پاسخ را در پیشخوان خودت می‌بینی.
+        </p>
+        <a class="ask__btn" href="{% url 'collab' %}">
+          <span>شروع درخواست همکاری</span>
+          <i aria-hidden="true">&larr;</i>
+        </a>
+      </div>
+      <span class="ask__glow" aria-hidden="true"></span>
+    </section>
+    {% endblock %}
+
+    <div class="foot__grid">
+      <div class="foot__col foot__col--wide">
+        <span class="foot__mark">YEKTA</span>
+        <p class="foot__say">{{ site_profile.tagline }}</p>
+        <div class="foot__social">
+          {% if site_profile.instagram %}
+            <a href="{{ site_profile.instagram }}" rel="noopener" target="_blank">اینستاگرام</a>
+          {% endif %}
+          {% if site_profile.email %}
+            <a href="mailto:{{ site_profile.email }}" dir="ltr">{{ site_profile.email }}</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="foot__col">
+        <h3>مجموعه‌ها</h3>
+        <ul>
+          {% for f in site_fields|slice:":6" %}
+            <li><a href="{% url 'collection' f.slug %}">{{ f.name_fa }}</a></li>
+          {% empty %}
+            <li><a href="{% url 'gallery' %}">فعالیت‌ها</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="foot__col">
+        <h3>مسیرها</h3>
+        <ul>
+          <li><a href="{% url 'gallery' %}">فعالیت‌ها</a></li>
+          <li><a href="{% url 'collab' %}">همکاری</a></li>
+          <li><a href="{% url 'support' %}">پشتیبانی</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% if user.is_model %}{% url 'studio' %}{% else %}{% url 'dashboard' %}{% endif %}">پیشخوان</a></li>
+            {% comment %}
+              خروج باید POST باشد: جنگو ۵ خروج با GET را نمی‌پذیرد، و درست هم
+              همین است — وگرنه یک لینک ساده در ایمیل می‌توانست کاربر را بیرون کند
+            {% endcomment %}
+            <li>
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}<button class="foot__out" type="submit">خروج</button>
+              </form>
+            </li>
+          {% else %}
+            <li><a href="{% url 'login' %}">ورود کارفرما</a></li>
+            <li><a href="{% url 'signup' %}">ثبت‌نام</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <div class="foot__col">
+        <h3>نمایش</h3>
+        <ul>
+          <li><button class="foot__lamp" data-lamp>روشن / خاموش</button></li>
+          <li><a href="#main">بالای صفحه</a></li>
+        </ul>
+      </div>
     </div>
 
   <div class="meadow" data-meadow aria-hidden="true">
@@ -74,7 +166,12 @@
       <span class="meadow__word" data-meadow-word>YEKTA</span>
     </div>
 
-    <!-- چمن: در عرض کشیده می‌شود تا هر پهنایی را پر کند -->
+    <!-- ذره‌های معلق: عمق صحنه را می‌سازند، مثل گرده‌ی گل در نور -->
+    <div class="meadow__motes" data-meadow-motes></div>
+
+    <!-- چمن: در عرض کشیده می‌شود تا هر پهنایی را پر کند.
+         سه گروه با سرعت‌های متفاوت تکان می‌خورند و JS شدت باد را روی
+         متغیر --wind می‌گذارد؛ نتیجه، وزشِ نامنظم به‌جای تکرار ماشینی. -->
     <svg class="meadow__grass" viewBox="0 0 1200 120" preserveAspectRatio="none">
         <g class="mg-set mg-set--1">
           <path class="mg" d="M-10.0 120Q-9.5 87.7 -7.4 48.1" stroke-width="5.8" opacity="0.48"/>
@@ -140,9 +237,13 @@
 
     <!-- گل: اندازه‌اش ثابت می‌ماند و همیشه وسط می‌ایستد -->
     <svg class="meadow__plant" viewBox="0 0 300 420" preserveAspectRatio="xMidYMax meet">
-      <path class="meadow__stem" d="M150 420C150 356 143 268 148 156"/>
-      <path class="meadow__leaf" d="M148 268c-30-17-58-11-74 9 26 15 54 13 74-9z"/>
-      <path class="meadow__leaf" d="M150 214c28-19 56-15 74 3-24 17-52 17-74-3z"/>
+      <path class="meadow__stem" data-meadow-stem d="M150 420C150 356 143 268 148 156"/>
+      <g class="meadow__leaf-a" data-meadow-leaf>
+        <path class="meadow__leaf" d="M148 268c-30-17-58-11-74 9 26 15 54 13 74-9z"/>
+      </g>
+      <g class="meadow__leaf-b" data-meadow-leaf>
+        <path class="meadow__leaf" d="M150 214c28-19 56-15 74 3-24 17-52 17-74-3z"/>
+      </g>
 
       <!-- گردن: از نوک ساقه می‌چرخد، پس سر واقعاً روی ساقه خم می‌شود -->
       <g class="meadow__neck" data-meadow-neck transform="translate(148 156)">
@@ -214,12 +315,15 @@
       </g>
     </svg>
   </div>
+
+    <p class="foot__fine">
+      <span>ساخته‌شده برای یکتا</span>
+      <span>© {{ site_profile.name_en }}</span>
+    </p>
   </footer>
 
   {% block js %}{% endblock %}
 
-  <!-- base.js عمداً آخرین اسکریپت است: باید بداند home.js روی این صفحه هست یا نه
-       تا منطق لامپ دوبار وصل نشود. -->
   <script src="{% static 'js/base.js' %}"></script>
 </body>
 </html>

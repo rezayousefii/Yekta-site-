@@ -1,0 +1,141 @@
+{% load fa %}{% comment %}
+داشبورد بالای صفحه‌ی اول پنل جنگو.
+
+عمداً استایلش درون‌خطی است: پنل جنگو فایل CSS خودش را دارد و اضافه‌کردن
+یک فایل تازه فقط برای یک بلوک، بار بی‌جهت است. رنگ‌ها هم از متغیرهای خود
+پنل (که در تم روشن/تیره عوض می‌شوند) گرفته شده‌اند.
+{% endcomment %}
+
+<div class="yk-dash">
+  <div class="yk-figs">
+    <a class="yk-fig" href="{% url 'admin:main_collabrequest_changelist' %}?status__exact=pending">
+      <b>{{ counts.pending }}</b><span>درخواست در انتظار</span>
+    </a>
+    <a class="yk-fig" href="{% url 'admin:main_employer_changelist' %}">
+      <b>{{ counts.employers }}</b><span>کارفرما</span>
+    </a>
+    <a class="yk-fig" href="{% url 'admin:main_photo_changelist' %}">
+      <b>{{ counts.photos }}</b><span>قاب منتشرشده</span>
+    </a>
+    <a class="yk-fig" href="{% url 'admin:main_supportticket_changelist' %}?is_done__exact=0">
+      <b>{{ counts.tickets }}</b><span>پشتیبانی رسیدگی‌نشده</span>
+    </a>
+    <a class="yk-fig" href="{% url 'studio' %}">
+      <b>{{ week }}</b><span>بازدید هفته</span>
+    </a>
+  </div>
+
+  <div class="yk-cols">
+    <section class="yk-card">
+      <h3>بازدید سایت — ۱۴ روز گذشته</h3>
+      <div class="yk-chart">
+        {% for c in chart %}
+          <span class="yk-col {% if c.today %}is-today{% endif %}"
+                title="{{ c.label }} — {{ c.hits }} بازدید">
+            <i style="height: {{ c.pct }}%"></i>
+          </span>
+        {% endfor %}
+      </div>
+      <p class="yk-foot">
+        {% if report %}
+          گزارش دیشب: {{ report.visits|fa }} بازدید، {{ report.clicks|fa }} کلیک،
+          {{ report.requests|fa }} درخواست.
+        {% else %}
+          هنوز گزارش شبانه‌ای ساخته نشده.
+        {% endif %}
+      </p>
+    </section>
+
+    <section class="yk-card">
+      <h3>پرکلیک‌ترین قاب‌ها — هفت روز گذشته</h3>
+      {% if hot %}
+        <ul class="yk-hot">
+          {% for p in hot %}
+            <li>
+              <a href="{% url 'admin:main_photo_change' p.pk %}">{{ p.label }}</a>
+              <span class="yk-bar"><i style="width: {{ p.pct }}%"></i></span>
+              <b>{{ p.recent|fa }}</b>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="yk-foot">هنوز کلیکی ثبت نشده.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <p class="yk-go">
+    برای کارهای روزمره، <a href="{% url 'studio' %}">پنل استودیو</a> سریع‌تر است.
+  </p>
+</div>
+
+<style>
+  .yk-dash { margin-bottom: 22px; }
+
+  .yk-figs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .yk-fig {
+    display: grid;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--darkened-bg, #f8f8f8);
+    border: 1px solid var(--hairline-color, #e0e0e0);
+    color: var(--body-fg, #333) !important;
+    text-decoration: none;
+  }
+
+  .yk-fig:hover { border-color: #1E6B57; }
+  .yk-fig b { font-size: 22px; font-weight: 400; line-height: 1.2; }
+  .yk-fig span { font-size: 11px; opacity: 0.72; }
+
+  .yk-cols { display: grid; gap: 12px; }
+  @media (min-width: 900px) { .yk-cols { grid-template-columns: 1fr 1fr; } }
+
+  .yk-card {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: var(--darkened-bg, #f8f8f8);
+    border: 1px solid var(--hairline-color, #e0e0e0);
+  }
+
+  .yk-card h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: .06em; opacity: .8; }
+
+  .yk-chart { display: flex; align-items: flex-end; gap: 3px; height: 92px; }
+
+  .yk-col { flex: 1; display: flex; align-items: flex-end; height: 100%; }
+
+  .yk-col i {
+    display: block;
+    width: 100%;
+    min-height: 2px;
+    border-radius: 3px 3px 0 0;
+    background: #1E6B57;
+  }
+
+  .yk-col.is-today i { background: #B45C24; }
+
+  .yk-foot { margin: 10px 0 0; font-size: 11px; opacity: .7; }
+
+  .yk-hot { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+
+  .yk-hot li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 90px 32px;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .yk-hot a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .yk-bar { height: 5px; border-radius: 999px; background: var(--hairline-color, #e0e0e0); }
+  .yk-bar i { display: block; height: 100%; border-radius: 999px; background: #F0B429; min-width: 3px; }
+  .yk-hot b { font-weight: 400; opacity: .7; text-align: end; }
+
+  .yk-go { margin: 12px 0 0; font-size: 12px; }
+</style>

@@ -1,0 +1,122 @@
+{% extends "studio/base.html" %}
+{% load fa %}
+
+{% block title %}فهرست‌ها{% endblock %}
+
+{% block content %}
+
+<section class="pulse">
+  <h1 class="sth">فهرست‌ها</h1>
+  <p class="stp">
+    هرچه اینجا اضافه کنی، همان لحظه در سایت و در ویزارد درخواست پیدا می‌شود:
+    مجموعه‌ها روی اسلایدر صفحه‌ی اول، و بقیه در فیلترها و فرم همکاری.
+  </p>
+</section>
+
+<div class="grid2">
+
+  <!-- ═══════ مجموعه‌ی تازه ═══════ -->
+  <section class="card">
+    <div class="card__head"><h2>مجموعه‌ی تازه</h2></div>
+
+    <form method="post" class="upl">
+      {% csrf_token %}
+      <input type="hidden" name="form" value="field">
+
+      <label class="fl">{{ field_form.name_fa }}<span>نام فارسی</span></label>
+      <label class="fl">{{ field_form.en }}<span>نام لاتین</span></label>
+      <label class="fl">{{ field_form.note }}<span>توضیح کوتاه</span></label>
+
+      <div class="upl__flags">
+        <label class="flag">{{ field_form.on_arc }}<span>روی اسلایدر صفحه‌ی اول</span></label>
+        <label class="flag">{{ field_form.is_active }}<span>فعال</span></label>
+      </div>
+
+      <button type="submit" class="btn btn--send">ساختن مجموعه <i>&larr;</i></button>
+    </form>
+  </section>
+
+  <!-- ═══════ گزینه‌ی تازه ═══════ -->
+  <section class="card">
+    <div class="card__head"><h2>گزینه‌ی تازه</h2></div>
+
+    <form method="post" class="upl">
+      {% csrf_token %}
+      <input type="hidden" name="form" value="tag">
+
+      <label class="fl fl--sel">{{ tag_form.group }}<span>به کدام فهرست؟</span></label>
+      <label class="fl">{{ tag_form.name }}<span>نام</span></label>
+      <label class="fl">{{ tag_form.note }}<span>توضیح کوتاه</span></label>
+
+      <button type="submit" class="btn btn--send">افزودن <i>&larr;</i></button>
+    </form>
+  </section>
+
+</div>
+
+<!-- ═══════ مجموعه‌ها ═══════ -->
+<section class="card">
+  <div class="card__head">
+    <h2>مجموعه‌ها</h2>
+    <span>{{ fields|length|fa }} مورد</span>
+  </div>
+
+  <ul class="rows">
+    {% for f in fields %}
+      <li class="row {% if not f.is_active %}is-off{% endif %}">
+        <span class="row__pic">
+          {% if f.cover_url %}<img src="{{ f.cover_url }}" alt="" loading="lazy">{% else %}<i>—</i>{% endif %}
+        </span>
+        <span class="row__txt">
+          <b>{{ f.name_fa }}</b>
+          <span>{{ f.en }} · {{ f.photo_count|fa }} قاب{% if f.on_arc %} · روی اسلایدر{% endif %}</span>
+        </span>
+        <form class="row__acts" method="post" action="{% url 'studio_list_action' %}">
+          {% csrf_token %}
+          <input type="hidden" name="group" value="field">
+          <input type="hidden" name="pk" value="{{ f.pk }}">
+          <a href="{% url 'collection' f.slug %}" target="_blank" rel="noopener">دیدن</a>
+          <button type="submit" name="do" value="toggle">{% if f.is_active %}خاموش{% else %}روشن{% endif %}</button>
+          <button type="submit" name="do" value="delete" class="is-bad"
+                  data-confirm="این مجموعه حذف شود؟ عکس‌هایش می‌مانند ولی بی‌مجموعه می‌شوند.">حذف</button>
+        </form>
+      </li>
+    {% empty %}
+      <li class="card__empty">هنوز مجموعه‌ای نساخته‌ای.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<div class="grid2">
+  {% for group, label, rows in tag_groups %}
+    <section class="card">
+      <div class="card__head">
+        <h2>{{ label }}</h2>
+        <span>{{ rows|length|fa }} مورد</span>
+      </div>
+
+      <ul class="rows rows--thin">
+        {% for t in rows %}
+          <li class="row {% if not t.is_active %}is-off{% endif %}">
+            <span class="row__txt">
+              <b>{{ t.name }}</b>
+              {% if t.note %}<span>{{ t.note }}</span>{% endif %}
+            </span>
+            <form class="row__acts" method="post" action="{% url 'studio_list_action' %}">
+              {% csrf_token %}
+              <input type="hidden" name="group" value="{{ group }}">
+              <input type="hidden" name="pk" value="{{ t.pk }}">
+              <button type="submit" name="do" value="toggle">{% if t.is_active %}خاموش{% else %}روشن{% endif %}</button>
+              <button type="submit" name="do" value="delete" class="is-bad"
+                      data-confirm="«{{ t.name }}» حذف شود؟">حذف</button>
+            </form>
+          </li>
+        {% empty %}
+          <li class="card__empty">خالی است.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+</div>
+
+{% endblock %}

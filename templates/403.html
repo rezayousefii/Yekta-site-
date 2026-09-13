@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}اجازه نداری — YEKTA{% endblock %}
+{% block body_class %}has-top{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'css/gallery.css' %}">{% endblock %}
+
+{% block content %}
+<section class="oops">
+  <p class="oops__num">۴۰۳</p>
+  <h1 class="oops__title">این بخش برای تو نیست</h1>
+  <p class="oops__note">
+    اگر فکر می‌کنی باید دسترسی داشته باشی، اول وارد حسابت شو.
+  </p>
+  <div class="oops__acts">
+    <a class="oops__go" href="{% url 'login' %}">ورود</a>
+    <a class="oops__alt" href="{% url 'home' %}">صفحه‌ی اول</a>
+  </div>
+</section>
+{% endblock %}

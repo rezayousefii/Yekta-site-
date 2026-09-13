@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static fa %}
+
+{% block title %}فعالیت‌ها — YEKTA{% endblock %}
+{% block desc %}نمونه‌کارهای یکتا: {{ total }} قاب، دسته‌بندی‌شده بر اساس نوع مدلینگ و محل.{% endblock %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'css/gallery.css' %}">{% endblock %}
+{% block body_class %}has-top{% endblock %}
+
+{% block content %}
+
+<header class="gtop">
+  <p class="crumb"><a href="{% url 'home' %}">خانه</a><span>›</span>فعالیت‌ها</p>
+
+  <h1 class="gtop__title">فعالیت‌ها</h1>
+  <p class="gtop__note">
+    هر قاب یک پروژه است. با نوع مدلینگ و محل، دقیقاً همان چیزی را ببین که
+    برای کار خودت لازم داری — بعد روی هر عکس بزن تا داستانش را بخوانی.
+  </p>
+
+  <!-- فیلترها: فرم ساده‌ی GET است، پس بدون جاوااسکریپت هم کار می‌کند و
+       نتیجه‌اش آدرس قابل اشتراک‌گذاری دارد. -->
+  <form class="filt" method="get" data-filter>
+    <div class="filt__group">
+      <span class="filt__lab">مدلِ</span>
+      <div class="filt__row">
+        <a class="chipf {% if not pick_type %}is-on{% endif %}"
+           href="?{% if pick_place %}place={{ pick_place }}{% endif %}">همه</a>
+        {% for t in types %}
+          <a class="chipf {% if pick_type == t.slug %}is-on{% endif %}"
+             href="?type={{ t.slug }}{% if pick_place %}&amp;place={{ pick_place }}{% endif %}">{{ t.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="filt__group">
+      <span class="filt__lab">محل</span>
+      <div class="filt__row">
+        <a class="chipf {% if not pick_place %}is-on{% endif %}"
+           href="?{% if pick_type %}type={{ pick_type }}{% endif %}">همه</a>
+        {% for p in places %}
+          <a class="chipf {% if pick_place == p.slug %}is-on{% endif %}"
+             href="?{% if pick_type %}type={{ pick_type }}&amp;{% endif %}place={{ p.slug }}">{{ p.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </form>
+
+  <p class="gtop__count">
+    <b data-count="{{ total }}">۰</b> قاب
+    {% if pick_type or pick_place %}
+      <a class="gtop__clear" href="{% url 'gallery' %}">برداشتن فیلترها</a>
+    {% endif %}
+  </p>
+</header>
+
+{% if photos %}
+  {% include "partials/masonry.html" with photos=photos %}
+
+  {% if photos.has_next %}
+    <div class="more">
+      <a class="more__btn" href="?{% if pick_type %}type={{ pick_type }}&amp;{% endif %}{% if pick_place %}place={{ pick_place }}&amp;{% endif %}page={{ photos.next_page_number }}">
+        قاب‌های بیشتر
+      </a>
+    </div>
+  {% endif %}
+{% else %}
+  <div class="void void--page">
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path class="void__seed" d="M30 52V30"/>
+      <path class="void__seed" d="M30 34c-9 0-14-6-14-13 8 0 14 5 14 13z"/>
+      <path class="void__seed" d="M30 30c9-1 14-7 13-14-8 0-13 6-13 14z"/>
+      <circle class="void__sun" cx="30" cy="14" r="5"/>
+    </svg>
+    <h3>با این فیلترها چیزی پیدا نشد</h3>
+    <p>یکی از فیلترها را بردار یا همه‌ی قاب‌ها را ببین.</p>
+    <a href="{% url 'gallery' %}">دیدن همه</a>
+  </div>
+{% endif %}
+
+<!-- مجموعه‌ها: راه دوم رسیدن به همان عکس‌ها، این‌بار بر اساس موضوع -->
+{% if fields %}
+<section class="gsets">
+  <p class="lab">یا از روی مجموعه</p>
+  <div class="gsets__row">
+    {% for f in fields %}
+      <a class="gset" href="{% url 'collection' f.slug %}">
+        <span class="gset__frame">
+          {% if f.cover_url %}<img src="{{ f.cover_url }}" alt="{{ f.name_fa }}" loading="lazy">{% endif %}
+        </span>
+        <span class="gset__name">{{ f.name_fa }}</span>
+        <span class="gset__n">{{ f.photo_count|fa }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block js %}<script src="{% static 'js/gallery.js' %}"></script>{% endblock %}
