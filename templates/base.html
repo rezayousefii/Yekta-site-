@@ -135,8 +135,10 @@
           <li><a href="{% url 'support' %}">پشتیبانی</a></li>
           {% if user.is_authenticated %}
             <li><a href="{% if user.is_model %}{% url 'studio' %}{% else %}{% url 'dashboard' %}{% endif %}">پیشخوان</a></li>
-            {# خروج باید POST باشد: جنگو ۵ خروج با GET را نمی‌پذیرد، و درست هم
-               همین است — وگرنه یک لینک ساده در ایمیل می‌توانست کاربر را بیرون کند #}
+            {% comment %}
+              خروج باید POST باشد: جنگو ۵ خروج با GET را نمی‌پذیرد، و درست هم
+              همین است — وگرنه یک لینک ساده در ایمیل می‌توانست کاربر را بیرون کند
+            {% endcomment %}
             <li>
               <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}<button class="foot__out" type="submit">خروج</button>

@@ -8,8 +8,10 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/gallery.css' %}">
 </head>
-{# ۵۰۰ عمداً از base.html ارث نمی‌برد: اگر خطا از خودِ context processor یا
-   دیتابیس باشد، قالبِ وابسته هم می‌شکند و کاربر صفحه‌ی سفید می‌بیند. #}
+{% comment %}
+  ۵۰۰ عمداً از base.html ارث نمی‌برد: اگر خطا از خودِ context processor یا
+  دیتابیس باشد، قالبِ وابسته هم می‌شکند و کاربر صفحه‌ی سفید می‌بیند.
+{% endcomment %}
 <body>
   <section class="oops">
     <p class="oops__num">۵۰۰</p>
